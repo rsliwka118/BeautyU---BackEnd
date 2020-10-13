@@ -1,14 +1,14 @@
 import {check} from "express-validator";
 
 import * as express from "express";
-import * as LoginController from "../controllers/loginController";
-import * as RegisterController from "../controllers/registerController";
+import * as AuthController from "../controllers/authController";
 
 import sessionChecker from "../middlewares/sessionChecker";
 import UserInputMiddleware from "../middlewares/input.middlewares";
 
 var Router = express.Router();
 
+//Register
 Router.post('/register', [
 
     check('firstName').trim().isLength({ min:1 }),
@@ -16,10 +16,12 @@ Router.post('/register', [
     check('email').isEmail(),
     check('password').trim().isLength({ min:1 }),
     
-], UserInputMiddleware, RegisterController.userSaveAction);
+], UserInputMiddleware, AuthController.register);
 
-Router.post('/login', sessionChecker, LoginController.login);
+//Login
+Router.post('/login', sessionChecker, AuthController.login);
 
-Router.post('/logout', LoginController.logout);
+//Logout
+Router.post('/logout', AuthController.logout);
 
 export {Router as LoginRoutes};

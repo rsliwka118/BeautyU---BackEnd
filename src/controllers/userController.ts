@@ -1,6 +1,7 @@
 import { getRepository } from "typeorm";
 import { User } from "../entity/User";
 
+//Get all users
 export async function usersGetAction(req,res){
 
     try
@@ -18,6 +19,7 @@ export async function usersGetAction(req,res){
     }
 }
 
+//Get user by ID
 export async function userGetByIdAction(req, res){
 
     try
