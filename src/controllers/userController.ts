@@ -1,29 +1,5 @@
 import { getRepository } from "typeorm";
-import * as UserModel from "../Models/user.models"
-import {User} from "../entity/User";
-
-export async function userSaveAction(req, res){
-
-    try
-    {
-        await UserModel.Register(
-            res,
-            req.body.firstName, 
-            req.body.lastName, 
-            req.body.email,
-            req.body.password );
-        
-        console.dir(req.body);
-        return;
-    }
-
-    catch(Error)
-    {
-        console.error(Error);
-        return res.status(500).send(); 
-    }
-
-}
+import { User } from "../entity/User";
 
 export async function usersGetAction(req,res){
 

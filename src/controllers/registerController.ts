@@ -1,5 +1,6 @@
-import {getManager, getRepository} from "typeorm";
+import { getRepository } from "typeorm";
 import {User} from "../entity/User";
+import { createHmac } from "crypto";
 
 export async function Register(res, FirstName: string, LastName: string, Email: string, Password: string){
     let Repository = getRepository(User);
@@ -23,3 +24,25 @@ export async function Register(res, FirstName: string, LastName: string, Email: 
     }
 }
 
+export async function userSaveAction(req, res){
+
+    try
+    {
+        await Register(
+            res,
+            req.body.firstName, 
+            req.body.lastName, 
+            req.body.email,
+            req.body.password );
+        
+        console.dir(req.body);
+        return;
+    }
+
+    catch(Error)
+    {
+        console.error(Error);
+        return res.status(500).send(); 
+    }
+
+}

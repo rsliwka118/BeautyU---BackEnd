@@ -5,7 +5,7 @@ import * as ExpressSession from 'express-session';
 
 import {createConnection} from "typeorm";
 import {UserRoutes} from "./routes/user.routes";
-import {LoginRoutes} from "./routes/login.routes";
+import {LoginRoutes} from "./routes/auth.routes";
 
 const app = Express();
 

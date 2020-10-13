@@ -1,5 +1,4 @@
 import { getRepository } from "typeorm";
-import * as UserModel from "../Models/user.models"
 import {User} from "../entity/User";
 import { createHmac } from "crypto";
 
