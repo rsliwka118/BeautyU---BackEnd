@@ -1,13 +1,13 @@
-import * as dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
+import * as dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 import "reflect-metadata";
 
 import * as Express from "express";
 // import * as ExpressSession from 'express-session';
-import {createConnection} from "typeorm";
-import {UserRoutes} from "./routes/user.routes";
-import {LoginRoutes} from "./routes/auth.routes";
+import { createConnection } from "typeorm";
+import { UserRoutes } from "./routes/user.routes";
+import { LoginRoutes } from "./routes/auth.routes";
 
 const app = Express();
 
@@ -15,7 +15,7 @@ const app = Express();
 // sessionStore = new MemoryStore();
 
 app.use(Express.json());
-app.use(Express.urlencoded({extended: true}));
+app.use(Express.urlencoded({ extended: true }));
 
 // app.use(ExpressSession(
 //     {
@@ -27,7 +27,7 @@ app.use(Express.urlencoded({extended: true}));
 //         resave: false,
 //         cookie:
 //         {
-//             exprises: 3600000 
+//             exprises: 3600000
 //         }
 //     }
 // ));
@@ -35,9 +35,9 @@ app.use(Express.urlencoded({extended: true}));
 app.use(UserRoutes);
 app.use(LoginRoutes);
 
-createConnection().then(async connection => {
-    
+createConnection()
+  .then(async (connection) => {
     app.listen(1337);
     console.log("Express application is up and running on port 1337");
-
-}).catch(error => console.log(error));
+  })
+  .catch((error) => console.log(error));

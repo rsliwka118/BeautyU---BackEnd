@@ -2,13 +2,12 @@ import * as express from "express";
 
 import * as UserController from "../controllers/userController";
 
-
 var Router = express.Router();
 
 //Get all users
-Router.get('/users', UserController.usersGetAction);
+Router.get("/users", UserController.usersGetAction);
 
 //Get user by ID
-Router.get('/users/:id', UserController.userGetByIdAction);
+Router.get("/users/:id", UserController.userGetByIdAction);
 
-export {Router as UserRoutes};
+export { Router as UserRoutes };
