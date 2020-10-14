@@ -1,6 +1,7 @@
 import { getRepository } from "typeorm";
-import {User} from "../entity/User";
+import { User } from "../entity/User";
 import { createHmac } from "crypto";
+import * as jwt from 'jsonwebtoken';
 
 //Register
 export async function register(req, res){
@@ -52,10 +53,9 @@ export async function login(req, res)
 
         if(user.password === createHmac('sha256', req.body.password).digest('hex'))
         {
-            req.session.userID = user.id;
-            res.send('Login succes!');
+            const accessToken = jwt.sign({ id: user.id }, process.env.JWT_ACCESS_SECRET, { expiresIn: 1200 })
 
-            return res.status(200).send();
+            return res.status(200).send({ accessToken });
         }
         else
         {
