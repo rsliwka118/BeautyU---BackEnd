@@ -1,8 +1,7 @@
 import * as jwt from "jsonwebtoken"
 
 export default async function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"]
-  const token = authHeader && authHeader.split(" ")[1]
+  const token = req.headers["authorization"]
 
   //empty token
   if (token == null) return res.sendStatus(401)

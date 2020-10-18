@@ -10,7 +10,7 @@ export async function usersGetAction(req, res) {
     return res.status(200).send(users)
   } catch (Error) {
     console.error(Error)
-    return res.status(500).send('server err')
+    return res.status(500).send("server err")
   }
 }
 
@@ -29,6 +29,24 @@ export async function userGetByIdAction(req, res) {
     return res.status(200).send(user)
   } catch (Error) {
     console.error(Error)
-    return res.status(500).send('server err')
+    return res.status(500).send("server err")
+  }
+}
+
+//Dashboard ( JWT test )
+export async function tokenTest(req, res) {
+  try {
+    let Repository = getRepository(User)
+    const user = await Repository.findOne(req.user.id)
+
+    if (!user) {
+      res.status(404)
+      res.end()
+      return
+    }
+
+    return res.status(200).send("Hello " + user.firstName + "!")
+  } catch {
+    return res.status(500).send("server err")
   }
 }

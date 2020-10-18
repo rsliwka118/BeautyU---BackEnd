@@ -8,7 +8,6 @@ import "reflect-metadata"
 import * as Express from "express"
 
 import { createConnection } from "typeorm"
-import { UserRoutes } from "./routes/user.routes"
 import { LoginRoutes } from "./routes/auth.routes"
 
 const app = Express()
@@ -16,8 +15,6 @@ const app = Express()
 app.use(Express.json())
 app.use(Express.urlencoded({ extended: true }))
 
-
-app.use(UserRoutes)
 app.use(LoginRoutes)
 
 createConnection()

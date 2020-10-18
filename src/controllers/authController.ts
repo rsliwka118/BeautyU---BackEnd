@@ -3,6 +3,8 @@ import { User } from "../entity/User"
 import { createHmac } from "crypto"
 import * as jwt from "jsonwebtoken"
 
+let refreshTokens = [] //Temporarily | refresh tokens will be stored in DB 
+
 //Register
 export async function register(req, res) {
   let Repository = getRepository(User)
@@ -29,7 +31,7 @@ export async function register(req, res) {
     }
   } catch (Error) {
     console.error(Error)
-    return res.status(500).send('server err')
+    return res.status(500).send("server err")
   }
 }
 
@@ -41,18 +43,21 @@ export async function login(req, res) {
     const user = await Repository.findOne({ where: { email: req.body.email } })
 
     if (user.password === createHmac("sha1", req.body.password).digest("hex")) {
-      
       const accessToken = generateToken(user)
-      const refreshToken = jwt.sign(JSON.parse(JSON.stringify(user)), process.env.JWT_REFRESH_SECRET)
+      const refreshToken = generateRefreshToken(user)
+      refreshTokens.push(refreshToken)
+
       console.log("Successfully logged in ( user ID: " + user.id + " )")
 
-      return res.status(200).send({ accessToken: accessToken, refreshToken: refreshToken })
+      return res
+        .status(200)
+        .send({ accessToken: accessToken, refreshToken: refreshToken })
     } else {
       return res.status(401).send("login failed")
     }
   } catch (Error) {
     console.error(Error)
-    return res.status(500).send('server err')
+    return res.status(500).send("server err")
   }
 }
 
@@ -63,30 +68,34 @@ export async function logout(req, res) {
     res.send("logout success!")
   } catch {
     console.error(Error)
-    return res.status(500).send('server err')
+    return res.status(500).send("server err")
   }
+}
+
+//Get refreshed token
+export async function refreshToken(req, res) {
+    
+  const refreshToken = req.body.token
+    
+    if (refreshToken == null) return res.sendStatus(401)
+    if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
+    
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, user) => {
+    
+      //token no longer valid
+      if (err) return res.sendStatus(403)
+      
+      const accessToken = generateToken({id: user.id})
+      res.json({ accessToken: accessToken })
+   })
 }
 
 //Generate Token
-function generateToken(user){
-  return jwt.sign( JSON.parse(JSON.stringify(user)), process.env.JWT_ACCESS_SECRET, { expiresIn: '30m' })
+function generateToken(user) {
+  return jwt.sign( JSON.parse(JSON.stringify(user)), process.env.JWT_ACCESS_SECRET, { expiresIn: "20s" } )
 }
 
-//Token auth test route
-export async function test(req, res) {
-  try{
-  let Repository = getRepository(User)
-  const user = await Repository.findOne(req.user.id)
-  
-  if (!user) {
-    res.status(404)
-    res.end()
-    return
-  }
-
-  return res.status(200).send('Hello ' + user.firstName + '!')
-  }
-  catch{
-    return res.status(500).send('server err')
-  }
+//Generate Refresh Token
+function generateRefreshToken(user) {
+  return jwt.sign( JSON.parse(JSON.stringify(user)), process.env.JWT_REFRESH_SECRET )
 }
