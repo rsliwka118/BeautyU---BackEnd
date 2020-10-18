@@ -1,5 +1,5 @@
 import { getRepository } from "typeorm";
-import { User } from "../entity/User";
+import { User } from "../../entity/authServer/User";
 import { createHmac } from "crypto";
 import * as jwt from "jsonwebtoken";
 
@@ -29,7 +29,7 @@ export async function register(req, res) {
     }
   } catch (Error) {
     console.error(Error);
-    return res.status(500).send();
+    return res.status(500).send('server err');
   }
 }
 
@@ -52,7 +52,7 @@ export async function login(req, res) {
     }
   } catch (Error) {
     console.error(Error);
-    return res.status(500).send();
+    return res.status(500).send('server err');
   }
 }
 
@@ -63,16 +63,14 @@ export async function logout(req, res) {
     res.send("logout success!");
   } catch {
     console.error(Error);
-    return res.status(500).send();
+    return res.status(500).send('server err');
   }
 }
 
 //Token auth test route
 export async function test(req, res) {
-  console.log(req.user);
   try{
   let Repository = getRepository(User);
-  console.log(req.user.id);
   const user = await Repository.findOne(req.user.id);
   
   if (!user) {
@@ -81,7 +79,7 @@ export async function test(req, res) {
     return;
   }
 
-  return res.status(200).send(user.firstName);
+  return res.status(200).send('Hello ' + user.firstName + '!');
   }
   catch{
     return res.status(500).send('server err');

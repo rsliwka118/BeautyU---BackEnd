@@ -1,11 +1,11 @@
 import { check } from "express-validator";
 
 import * as express from "express";
-import * as AuthController from "../controllers/authController";
+import * as AuthController from "../../controllers/authServer/authController";
 
-import sessionChecker from "../middlewares/authenticateToken.middlewares";
-import UserInputMiddleware from "../middlewares/input.middlewares";
-import authenticateToken from "../middlewares/authenticateToken.middlewares";
+import sessionChecker from "../../middlewares/authServer/authenticateToken.middlewares";
+import UserInputMiddleware from "../../middlewares/authServer/input.middlewares";
+import authenticateToken from "../../middlewares/authServer/authenticateToken.middlewares";
 
 var Router = express.Router();
 

@@ -1,5 +1,5 @@
 import { getRepository } from "typeorm";
-import { User } from "../entity/User";
+import { User } from "../../entity/authServer/User";
 
 //Get all users
 export async function usersGetAction(req, res) {
@@ -10,7 +10,7 @@ export async function usersGetAction(req, res) {
     return res.status(200).send(users);
   } catch (Error) {
     console.error(Error);
-    return res.status(500).send();
+    return res.status(500).send('server err');
   }
 }
 
@@ -29,6 +29,6 @@ export async function userGetByIdAction(req, res) {
     return res.status(200).send(user);
   } catch (Error) {
     console.error(Error);
-    return res.status(500).send();
+    return res.status(500).send('server err');
   }
 }
