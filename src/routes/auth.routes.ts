@@ -5,6 +5,7 @@ import * as AuthController from "../controllers/authController";
 
 import sessionChecker from "../middlewares/authenticateToken.middlewares";
 import UserInputMiddleware from "../middlewares/input.middlewares";
+import authenticateToken from "../middlewares/authenticateToken.middlewares";
 
 var Router = express.Router();
 
@@ -26,5 +27,8 @@ Router.post("/login", AuthController.login);
 
 //Logout
 Router.post("/logout", AuthController.logout);
+
+//Token test
+Router.post("/dashboard", authenticateToken, AuthController.test);
 
 export { Router as LoginRoutes };

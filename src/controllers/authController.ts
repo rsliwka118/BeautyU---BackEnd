@@ -41,10 +41,7 @@ export async function login(req, res) {
     const user = await Repository.findOne({ where: { email: req.body.email } });
 
     if (user.password === createHmac("sha1", req.body.password).digest("hex")) {
-      const accessToken = jwt.sign(
-        { id: user.id },
-        process.env.JWT_ACCESS_SECRET,
-        { expiresIn: 1200 }
+      const accessToken = jwt.sign( JSON.parse(JSON.stringify(user)), process.env.JWT_ACCESS_SECRET, { expiresIn: 1200 }
       );
 
       console.log("Successfully logged in ( user ID: " + user.id + " )");
@@ -59,6 +56,7 @@ export async function login(req, res) {
   }
 }
 
+//Logout
 export async function logout(req, res) {
   try {
     req.session.destroy();
@@ -66,5 +64,26 @@ export async function logout(req, res) {
   } catch {
     console.error(Error);
     return res.status(500).send();
+  }
+}
+
+//Token auth test route
+export async function test(req, res) {
+  console.log(req.user);
+  try{
+  let Repository = getRepository(User);
+  console.log(req.user.id);
+  const user = await Repository.findOne(req.user.id);
+  
+  if (!user) {
+    res.status(404);
+    res.end();
+    return;
+  }
+
+  return res.status(200).send(user.firstName);
+  }
+  catch{
+    return res.status(500).send('server err');
   }
 }
