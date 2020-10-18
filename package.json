@@ -23,8 +23,7 @@
       "typeorm": "0.2.26"
    },
    "scripts": {
-      "StartSalon": "nodemon scr/salonServer.ts",
-      "StartClient": "nodemon src/clientServer.ts",
+      "StartApp": "nodemon src/appServer.ts",
       "StartAuth": "nodemon src/authServer.ts"
    }
 }

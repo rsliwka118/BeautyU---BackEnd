@@ -1,43 +1,37 @@
-import { createHmac } from "crypto";
+import { createHmac } from "crypto"
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   BeforeInsert,
   BeforeUpdate,
-} from "typeorm";
-
-// enum AccountType {
-//   Client,
-//   Salon,
-//   Admin,
-// }
+} from "typeorm"
 
 @Entity({ name: "users" })
 export class User {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
+  id: number
 
   @Column()
-  accountType: string;
+  accountType: string
 
   @Column()
-  firstName: string;
+  firstName: string
 
   @Column()
-  lastName: string;
+  lastName: string
 
   @Column({ unique: true })
-  email: string;
+  email: string
 
   @Column()
-  password: string;
+  password: string
 
   @BeforeInsert()
   @BeforeUpdate()
   hashPassword() {
     if (this.password) {
-      this.password = createHmac("sha1", this.password).digest("hex");
+      this.password = createHmac("sha1", this.password).digest("hex")
     }
   }
 }
