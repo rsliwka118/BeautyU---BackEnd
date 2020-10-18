@@ -28,7 +28,7 @@ Router.post("/login", AuthController.login);
 Router.post("/token", AuthController.refreshToken);
 
 //Logout
-Router.post("/logout", AuthController.logout);
+Router.delete("/logout", AuthController.logout);
 
 
 export { Router as LoginRoutes };

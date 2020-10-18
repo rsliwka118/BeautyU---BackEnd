@@ -63,13 +63,8 @@ export async function login(req, res) {
 
 //Logout
 export async function logout(req, res) {
-  try {
-    req.session.destroy()
-    res.send("logout success!")
-  } catch {
-    console.error(Error)
-    return res.status(500).send("server err")
-  }
+  refreshTokens = refreshTokens.filter(token => token !== req.body.token)
+  res.sendStatus(204).send("logged out")
 }
 
 //Get refreshed token
@@ -92,7 +87,7 @@ export async function refreshToken(req, res) {
 
 //Generate Token
 function generateToken(user) {
-  return jwt.sign( JSON.parse(JSON.stringify(user)), process.env.JWT_ACCESS_SECRET, { expiresIn: "20s" } )
+  return jwt.sign( JSON.parse(JSON.stringify(user)), process.env.JWT_ACCESS_SECRET, { expiresIn: "60m" } )
 }
 
 //Generate Refresh Token
