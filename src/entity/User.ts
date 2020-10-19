@@ -1,13 +1,19 @@
 import { createHmac } from "crypto"
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToOne, JoinColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate } from "typeorm"
+
+enum AccoutType{
+  Admin="Admin",
+  Client="Client",
+  Salon="Salon"
+}
 
 @Entity({ name: "users" })
 export class User {
   @PrimaryGeneratedColumn("uuid")
   id: number
 
-  @Column()
-  accountType: string
+  @Column("enum", { enum: AccoutType })
+  accountType: AccoutType
 
   @Column()
   firstName: string
