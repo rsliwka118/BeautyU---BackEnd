@@ -2,8 +2,9 @@ import { getRepository } from "typeorm"
 import { User } from "../entity/User"
 import { createHmac } from "crypto"
 import * as jwt from "jsonwebtoken"
+import { RefreshToken } from "../entity/RefreshToken"
 
-let refreshTokens = [] //Temporarily | refresh tokens will be stored in DB 
+//let refreshTokens = [] //Temporarily | refresh tokens will be stored in DB 
 
 //Register
 export async function register(req, res) {
@@ -38,14 +39,25 @@ export async function register(req, res) {
 //Login
 export async function login(req, res) {
   try {
-    let Repository = getRepository(User)
+    let RepositoryUser = getRepository(User)
+    let RepositoryRefreshToken = getRepository(RefreshToken)
 
-    const user = await Repository.findOne({ where: { email: req.body.email } })
+    const user = await RepositoryUser.findOne({ where: { email: req.body.email } })
+    let tokenExists = await RepositoryRefreshToken.findOne({ where: { userID: user.id } })
 
     if (user.password === createHmac("sha1", req.body.password).digest("hex")) {
       const accessToken = generateToken(user)
       const refreshToken = generateRefreshToken(user)
-      refreshTokens.push(refreshToken)
+      
+      if (tokenExists == null) {
+
+        let NewToken = new RefreshToken()
+        NewToken.userID = user.id
+        NewToken.refreshToken = refreshToken
+        await RepositoryRefreshToken.save(NewToken)
+
+        console.log("Successfully added refreshToken for user ID: " + user.id + " )")
+      }
 
       console.log("Successfully logged in ( user ID: " + user.id + " )")
 
@@ -63,17 +75,23 @@ export async function login(req, res) {
 
 //Logout
 export async function logout(req, res) {
-  refreshTokens = refreshTokens.filter(token => token !== req.body.token)
-  res.sendStatus(204).send("logged out")
+
+  let RepositoryRefreshToken = getRepository(RefreshToken)
+
+  await RepositoryRefreshToken.delete({ refreshToken: req.body.token });
+  return res.sendStatus(204)
 }
 
-//Get refreshed token
+//Get new access token
 export async function refreshToken(req, res) {
-    
+
   const refreshToken = req.body.token
-    
+
+  let RepositoryRefreshToken = getRepository(RefreshToken)
+  let tokenExists = await RepositoryRefreshToken.findOne({ where: { refreshToken: refreshToken } })
+  
     if (refreshToken == null) return res.sendStatus(401)
-    if (!refreshTokens.includes(refreshToken)) return res.sendStatus(403)
+    if (tokenExists == null) return res.sendStatus(403)
     
     jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, user) => {
     
@@ -87,10 +105,10 @@ export async function refreshToken(req, res) {
 
 //Generate Token
 function generateToken(user) {
-  return jwt.sign( JSON.parse(JSON.stringify(user)), process.env.JWT_ACCESS_SECRET, { expiresIn: "60m" } )
+  return jwt.sign( {id: user.id} , process.env.JWT_ACCESS_SECRET, { expiresIn: "30m" } )
 }
 
 //Generate Refresh Token
 function generateRefreshToken(user) {
-  return jwt.sign( JSON.parse(JSON.stringify(user)), process.env.JWT_REFRESH_SECRET )
+  return jwt.sign( {id: user.id}, process.env.JWT_REFRESH_SECRET )
 }

@@ -1,11 +1,5 @@
 import { createHmac } from "crypto"
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  BeforeInsert,
-  BeforeUpdate,
-} from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToOne, JoinColumn } from "typeorm"
 
 @Entity({ name: "users" })
 export class User {
