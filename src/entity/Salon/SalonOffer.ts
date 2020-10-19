@@ -1,14 +1,17 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
 
-@Entity({ name: "salons" })
-export class RefreshToken {
+@Entity({ name: "salonOffers" })
+export class SalonOffer {
   @PrimaryGeneratedColumn("uuid")
   id: number
 
   @Column()
-  ownerID: number
+  salonID: number
 
   @Column()
-  type: string
+  userID: number
+
+  @Column()
+  offerTitle: string
 
 }

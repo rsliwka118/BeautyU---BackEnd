@@ -1,8 +1,8 @@
 import { getRepository } from "typeorm"
-import { User } from "../entity/User"
+import { User } from "../entity/User/User"
 import { createHmac } from "crypto"
 import * as jwt from "jsonwebtoken"
-import { Token } from "../entity/Token"
+import { Token } from "../entity/User/Token"
 
 //Register
 export async function register(req, res) {
