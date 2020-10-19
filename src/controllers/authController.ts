@@ -2,7 +2,7 @@ import { getRepository } from "typeorm"
 import { User } from "../entity/User"
 import { createHmac } from "crypto"
 import * as jwt from "jsonwebtoken"
-import { RefreshToken } from "../entity/RefreshToken"
+import { Token } from "../entity/Token"
 
 //Register
 export async function register(req, res) {
@@ -38,19 +38,21 @@ export async function register(req, res) {
 export async function login(req, res) {
   try {
     let RepositoryUser = getRepository(User)
-    let RepositoryRefreshToken = getRepository(RefreshToken)
+    let RepositoryRefreshToken = getRepository(Token)
 
     const user = await RepositoryUser.findOne({ where: { email: req.body.email } })
     const tokenExists = await RepositoryRefreshToken.findOne({ where: { userID: user.id } })
 
+    //Check password
     if (user.password === createHmac("sha1", req.body.password).digest("hex")) {
       
       const accessToken = generateToken(user)
-      
+
+      //Check if refresh token already exists for this user.
       if (tokenExists == null) {
         const refreshToken = generateRefreshToken(user)
 
-        let NewToken = new RefreshToken()
+        let NewToken = new Token()
         NewToken.userID = user.id
         NewToken.refreshToken = refreshToken
         await RepositoryRefreshToken.save(NewToken)
@@ -79,7 +81,7 @@ export async function login(req, res) {
 //Logout
 export async function logout(req, res) {
 
-  let RepositoryRefreshToken = getRepository(RefreshToken)
+  let RepositoryRefreshToken = getRepository(Token)
 
   await RepositoryRefreshToken.delete({ refreshToken: req.body.token });
   return res.sendStatus(204)
@@ -90,7 +92,7 @@ export async function refreshToken(req, res) {
 
   const refreshToken = req.body.token
 
-  let RepositoryRefreshToken = getRepository(RefreshToken)
+  let RepositoryRefreshToken = getRepository(Token)
   let tokenExists = await RepositoryRefreshToken.findOne({ where: { refreshToken: refreshToken } })
   
     if (refreshToken == null) return res.sendStatus(401)
@@ -98,7 +100,7 @@ export async function refreshToken(req, res) {
     
     jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, user) => {
     
-      //token no longer valid
+      //Token no longer valid
       if (err) return res.sendStatus(403)
       
       const accessToken = generateToken({id: user.id})

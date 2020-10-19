@@ -12,10 +12,10 @@ var Router = express.Router();
 Router.post(
   "/register",
   [
-    check("firstName").trim().isLength({ min: 1 }),
-    check("lastName").trim().isLength({ min: 1 }),
-    check("email").isEmail(),
-    check("password").trim().isLength({ min: 1 }),
+    check("firstName", "Incorrect firstName").trim().isLength({ min: 1 }),
+    check("lastName", "Incorrect lastName").trim().isLength({ min: 1 }),
+    check("email", "Incorrect email").isEmail(),
+    check("password", "Incorrect password").isLength({ min: 8 }).matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})")
   ],
   UserInputMiddleware,
   AuthController.register
