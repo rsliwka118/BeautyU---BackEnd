@@ -4,8 +4,6 @@ import { createHmac } from "crypto"
 import * as jwt from "jsonwebtoken"
 import { RefreshToken } from "../entity/RefreshToken"
 
-//let refreshTokens = [] //Temporarily | refresh tokens will be stored in DB 
-
 //Register
 export async function register(req, res) {
   let Repository = getRepository(User)
@@ -43,27 +41,32 @@ export async function login(req, res) {
     let RepositoryRefreshToken = getRepository(RefreshToken)
 
     const user = await RepositoryUser.findOne({ where: { email: req.body.email } })
-    let tokenExists = await RepositoryRefreshToken.findOne({ where: { userID: user.id } })
+    const tokenExists = await RepositoryRefreshToken.findOne({ where: { userID: user.id } })
 
     if (user.password === createHmac("sha1", req.body.password).digest("hex")) {
+      
       const accessToken = generateToken(user)
-      const refreshToken = generateRefreshToken(user)
       
       if (tokenExists == null) {
+        const refreshToken = generateRefreshToken(user)
 
         let NewToken = new RefreshToken()
         NewToken.userID = user.id
         NewToken.refreshToken = refreshToken
         await RepositoryRefreshToken.save(NewToken)
 
+        console.log("Successfully logged in ( user ID: " + user.id + " )")
         console.log("Successfully added refreshToken for user ID: " + user.id + " )")
-      }
 
+        return res.status(200).send({ accessToken: accessToken, refreshToken: refreshToken})
+      
+      } else {
+      
       console.log("Successfully logged in ( user ID: " + user.id + " )")
 
-      return res
-        .status(200)
-        .send({ accessToken: accessToken, refreshToken: refreshToken })
+      return res.status(200).send({ accessToken: accessToken, refreshToken: tokenExists.refreshToken})
+      }
+
     } else {
       return res.status(401).send("login failed")
     }
