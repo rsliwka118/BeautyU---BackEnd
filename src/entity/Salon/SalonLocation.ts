@@ -1,12 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm"
 
 @Entity({ name: "salonLocations" })
 export class SalonLocation {
   @PrimaryGeneratedColumn("uuid")
   id: number
-
-  @Column()
-  salonID: number
 
   @Column()
   city: string
@@ -22,5 +19,4 @@ export class SalonLocation {
 
   @Column()
   apartmentNumber: string
-
 }

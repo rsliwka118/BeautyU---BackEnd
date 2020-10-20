@@ -1,4 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne } from "typeorm"
+import { SalonService } from "./SalonService"
+import { SalonReview } from "./SalonReview"
+import { SalonLocation } from "./SalonLocation"
 
 enum SalonType{
     Hairdresser="Hairdresser",
@@ -17,19 +20,31 @@ export class Salon {
   @Column()
   ownerID: number
 
+  @Column()
+  name: string
+
   @Column("enum", { enum: SalonType })
   type: SalonType
+
+  @Column()
+  describe: string
 
   @Column()
   rate: number
 
   @Column()
-  review: string
+  hours: string //Day1&OpeningHour&ClosingHour&Day2...
 
-  @Column()
-  location: string
+  @OneToMany( () => Salon, offer => SalonService )
+  @JoinColumn()
+  services: SalonService[]
 
-  @Column()
-  hours: string
+  @OneToMany( () => Salon, review => SalonReview )
+  @JoinColumn()
+  reviews: SalonReview[]
+
+  @OneToOne( location => SalonLocation )
+  @JoinColumn()
+  location: SalonLocation
 
 }

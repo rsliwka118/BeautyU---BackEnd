@@ -1,24 +1,15 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm"
 import { Salon } from "./Salon"
 
-@Entity({ name: "salonReview" })
-export class SalonReview {
+@Entity({ name: "salonService" })
+export class SalonService {
   @PrimaryGeneratedColumn("uuid")
   id: number
 
   @Column()
-  userID: number
-
-  @Column()
-  review: string
-
-  @Column()
-  rate: string
-
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  dateAdded: string
+  offerTitle: string
 
   @ManyToOne( () => Salon, salon => salon.services)
   salon: Salon;
-
+  
 }

@@ -1,5 +1,5 @@
 import { getRepository } from "typeorm"
-import { User } from "../entity/User"
+import { User } from "../entity/User/User"
 
 //Get all users
 export async function usersGetAction(req, res) {
