@@ -1,6 +1,6 @@
 import { validationResult } from 'express-validator'
  
-export default async function UserInputMiddleware(req, res, next) 
+export default async function CheckInputMiddleware(req, res, next) 
 {
     const errors = validationResult(req)
 
