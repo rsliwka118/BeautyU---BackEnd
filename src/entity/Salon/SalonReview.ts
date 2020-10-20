@@ -4,10 +4,10 @@ import { Salon } from "./Salon"
 @Entity({ name: "salonReview" })
 export class SalonReview {
   @PrimaryGeneratedColumn("uuid")
-  id: number
+  id: string
 
   @Column()
-  userID: number
+  userID: string
 
   @Column()
   review: string

@@ -1,9 +1,9 @@
 import { check } from "express-validator";
 
 import * as express from "express";
-import * as AuthController from "../controllers/authController";
+import * as AuthController from "../../controllers/User/authController";
 
-import UserInputMiddleware from "../middlewares/input.middlewares";
+import UserInputMiddleware from "../../middlewares/input.middlewares";
 
 
 var Router = express.Router();

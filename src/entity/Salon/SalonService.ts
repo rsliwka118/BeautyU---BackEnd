@@ -4,10 +4,13 @@ import { Salon } from "./Salon"
 @Entity({ name: "salonService" })
 export class SalonService {
   @PrimaryGeneratedColumn("uuid")
-  id: number
+  id: string
 
   @Column()
   offerTitle: string
+
+  @Column()
+  price: string
 
   @ManyToOne( () => Salon, salon => salon.services)
   salon: Salon;

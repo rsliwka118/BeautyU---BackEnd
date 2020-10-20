@@ -5,7 +5,8 @@ import "reflect-metadata"
 import * as Express from "express"
 
 import { createConnection } from "typeorm"
-import { UserRoutes } from "./routes/user.routes"
+import { UserRoutes } from "./routes/User/user.routes"
+import { SalonRoutes } from "./routes/Salon/salon.routes"
 
 const app = Express()
 
@@ -13,6 +14,7 @@ app.use(Express.json())
 app.use(Express.urlencoded({ extended: true }))
 
 app.use(UserRoutes)
+app.use(SalonRoutes)
 
 createConnection()
   .then(async (connection) => {

@@ -15,10 +15,10 @@ enum SalonType{
 @Entity({ name: "salons" })
 export class Salon {
   @PrimaryGeneratedColumn("uuid")
-  id: number
+  id: string
 
   @Column()
-  ownerID: number
+  ownerID: string
 
   @Column()
   name: string

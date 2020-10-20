@@ -10,7 +10,7 @@ enum AccoutType{
 @Entity({ name: "users" })
 export class User {
   @PrimaryGeneratedColumn("uuid")
-  id: number
+  id: string
 
   @Column("enum", { enum: AccoutType })
   accountType: AccoutType

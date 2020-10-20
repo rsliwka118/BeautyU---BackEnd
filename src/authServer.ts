@@ -8,7 +8,7 @@ import "reflect-metadata"
 import * as Express from "express"
 
 import { createConnection } from "typeorm"
-import { LoginRoutes } from "./routes/auth.routes"
+import { LoginRoutes } from "./routes/User/auth.routes"
 
 const app = Express()
 

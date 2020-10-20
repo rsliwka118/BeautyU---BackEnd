@@ -1,7 +1,7 @@
 import * as express from "express";
 
-import * as UserController from "../controllers/userController";
-import authenticateToken from "../middlewares/authenticateToken.middlewares";
+import * as UserController from "../../controllers/User/userController";
+import authenticateToken from "../../middlewares/authenticateToken.middlewares";
 
 var Router = express.Router();
 

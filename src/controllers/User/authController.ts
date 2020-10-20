@@ -1,8 +1,8 @@
 import { getRepository } from "typeorm"
-import { User } from "../entity/User/User"
+import { User } from "../../entity/User/User"
 import { createHmac } from "crypto"
 import * as jwt from "jsonwebtoken"
-import { Token } from "../entity/User/Token"
+import { Token } from "../../entity/User/Token"
 
 //Register
 export async function register(req, res) {
@@ -78,7 +78,7 @@ export async function login(req, res) {
   }
 }
 
-//Logout
+//Logout ( delete refresh token )
 export async function logout(req, res) {
 
   let RepositoryRefreshToken = getRepository(Token)
