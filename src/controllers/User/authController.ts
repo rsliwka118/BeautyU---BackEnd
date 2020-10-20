@@ -13,6 +13,7 @@ export async function register(req, res) {
   try {
     if (Exists == null) {
       let NewUser = new User()
+
       NewUser.accountType = req.body.accountType
       NewUser.firstName = req.body.firstName
       NewUser.lastName = req.body.lastName
@@ -24,9 +25,9 @@ export async function register(req, res) {
       console.dir(NewUser)
       res.send("Register succes!")
 
-      return res.status(200).send()
+      return res.status(200)
     } else {
-      return res.status(400).send()
+      return res.status(400)
     }
   } catch (Error) {
     console.error(Error)
