@@ -1,3 +1,4 @@
+import { createHmac } from "crypto";
 import { getRepository } from "typeorm"
 import { Salon } from "../../entity/Salon/Salon"
 import { SalonLocation } from "../../entity/Salon/SalonLocation";
@@ -62,11 +63,11 @@ export async function addSalon(req, res) {
 //Update salon
 export async function updateSalon(req, res) {
   let RepositoryUsers = getRepository(User)
-  let RepositorySalons = getRepository(Salon)
+  let RepositorySalon = getRepository(Salon)
   let RepositorySalonLocation = getRepository(SalonLocation)
   
   const user = await RepositoryUsers.findOne(req.user.id)
-  const salonExist = await RepositorySalons.findOne(req.params.id)
+  const salonExist = await RepositorySalon.findOne(req.params.id)
   const locationExist = await RepositorySalonLocation.findOne(salonExist.location)
 
   try {
@@ -85,7 +86,7 @@ export async function updateSalon(req, res) {
       )
 
       //Update Salon
-      await RepositorySalons.update(req.params.id,
+      await RepositorySalon.update(req.params.id,
         {
           name: checkEmpty(req.body.name, salonExist.name),
           type: checkEmpty(req.body.type, salonExist.type),
@@ -107,6 +108,37 @@ export async function updateSalon(req, res) {
 }
 
 //Delete salon
+export async function deleteSalon(req, res) {
+
+  let RepositoryUsers = getRepository(User)
+  let RepositorySalon = getRepository(Salon)
+  let RepositorySalonLocation = getRepository(SalonLocation)
+
+  try {
+    const user = await RepositoryUsers.findOne(req.user.id)
+    console.log(req.user.id)
+    const salonExist = await RepositorySalon.findOne(req.params.id)
+    
+    //Check if salon exist
+    if (salonExist == null) return res.status(404).send("No salon found")
+
+    //Check if owners password is correct
+    if (user.password === createHmac("sha1", req.body.password).digest("hex")) {
+      const locationExist = await RepositorySalonLocation.findOne(salonExist.location)
+
+      await RepositorySalon.delete(salonExist);
+      await RepositorySalonLocation.delete(locationExist);
+
+      res.send("Successfully deleted salon " + salonExist.name +  "( id: "+ salonExist.id + ")")
+      return res.status(204)
+    } else {
+      return res.status(401).send("The correct password is required to delete the salon")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
 
 //Add new salon service
 

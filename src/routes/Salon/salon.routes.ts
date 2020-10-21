@@ -34,7 +34,7 @@ Router.put("/salon/:id",
   CheckInputMiddleware, authenticateToken, SalonController.updateSalon)
 
 //Delete salon
-
+Router.delete("/salon/:id", authenticateToken, SalonController.deleteSalon)
 //Add new salon service
 
 //Update salon service
