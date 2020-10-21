@@ -12,6 +12,9 @@ export class SalonService {
   @Column()
   price: string
 
+  @Column()
+  time: string
+
   @ManyToOne( () => Salon, salon => salon.services)
   salon: Salon;
   
