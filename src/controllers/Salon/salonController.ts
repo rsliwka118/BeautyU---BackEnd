@@ -48,9 +48,8 @@ export async function addSalon(req, res) {
 
         await RepositorySalon.save(NewSalon)
         console.dir(NewSalon)
-        res.send("Successfuly added new salon for " + user.firstName + "!")
 
-        return res.status(200)
+        return res.status(200).send("Successfuly added new salon for " + user.firstName + "!")
     } else {
         return res.status(400).send("access denied ( route for salon account )")
       }
@@ -93,9 +92,7 @@ export async function updateSalon(req, res) {
           hours: checkEmpty(req.body.hours, salon.hours)
         })
 
-      res.send("Successfuly updated salon for " + user.firstName + "!")
-
-      return res.status(200)
+      return res.status(200).send("Successfuly updated salon for " + user.firstName + "!")
   } else {
       return res.status(400).send("access denied ( route for salon account )")
     }
@@ -162,9 +159,8 @@ export async function addSalonService(req, res) {
       await RepositorySalon.save(salon)
 
       console.dir(NewService)
-      res.send("Successfuly added new service for " + salon.name + "!")
 
-      return res.status(200)
+      return res.status(200).send("Successfuly added new service for " + salon.name + "!")
   } else {
       return res.status(400).send("access denied ( route for salon account )")
     }
@@ -175,10 +171,38 @@ export async function addSalonService(req, res) {
 }
 
 //Update salon service
+export async function updateSalonService(req, res) {
+  let RepositoryUsers = getRepository(User)
+  let RepositorySalonService = getRepository(SalonService)
+  
+  const user = await RepositoryUsers.findOne(req.user.id)
+  const salonService = await RepositorySalonService.findOne(req.params.id)
+  try {
+    if (salonService == null) return res.status(404).send("No salon found")
+    if (checkAccountType(user)) {
+
+      //Update Service
+      await RepositorySalonService.update(salonService.id,
+        {
+          offerTitle: checkEmpty(req.body.offerTitle, salonService.offerTitle),
+          time: checkEmpty(req.body.time, salonService.time),
+          price: checkEmpty(req.body.price, salonService.price),
+          
+        })
+
+      return res.status(200).send("Successfuly update the service")
+  } else {
+      return res.status(400).send("access denied ( route for salon account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
 
 //Delete salon service
 
-//Add salon review
+//Add salon review ( for clients )
 
 //Get all salons
 

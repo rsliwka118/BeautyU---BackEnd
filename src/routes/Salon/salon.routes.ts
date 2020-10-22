@@ -46,8 +46,14 @@ Router.post("/salonservice/:id",
   CheckInputMiddleware, authenticateToken, SalonController.addSalonService)
 
 //Update salon service
+Router.put("/salonservice/:id",
+  [
+    check("offerTitle", "Offer title name can contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
+  ],
+  CheckInputMiddleware, authenticateToken, SalonController.updateSalonService)
 
 //Delete salon service
+//Router.delete("/salonservice/:id", authenticateToken, SalonController.deleteSalonService)
 
 //Add salon review
 
