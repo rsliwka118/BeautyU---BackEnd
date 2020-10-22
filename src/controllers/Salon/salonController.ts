@@ -284,3 +284,28 @@ export async function getSalons(req, res) {
 }
 
 //Get salon by ID
+export async function getSalonByID(req, res) {
+  try {
+    let RepositorySalon = getRepository(Salon)
+    let RepositoryUsers = getRepository(User)
+
+    const salon = await RepositorySalon.findOne(req.params.id)
+    const user = await RepositoryUsers.findOne(req.user.id)
+
+    if (!checkAccountType(user)) {
+
+      if (!salon) {
+        res.status(404)
+        res.end()
+        return
+      }
+
+      return res.status(200).send(salon)
+    } else {
+     return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}

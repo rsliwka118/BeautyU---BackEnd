@@ -59,7 +59,7 @@ Router.delete("/salonsservice/:id", authenticateToken, SalonController.deleteSal
 Router.get("/salons",authenticateToken, SalonController.getSalons)
 
 //Get salon by ID
-//Router.get("/salons/:id",authenticateToken, SalonController.getSalon)
+Router.get("/salons/:id",authenticateToken, SalonController.getSalonByID)
 
 //Add salon review
 Router.post("/reviews/:id", authenticateToken, SalonController.addReview)
