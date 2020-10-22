@@ -227,13 +227,14 @@ export async function deleteSalonService(req, res) {
 
 //Add salon review ( for clients )
 export async function addReview(req, res) {
-  let RepositoryUsers = getRepository(User)
-  let RepositorySalon = getRepository(Salon)
-  let RepositorySalonReview = getRepository(SalonReview)
-  
-  const user = await RepositoryUsers.findOne(req.user.id)
-  const salon = await RepositorySalon.findOne(req.params.id)
   try {
+    let RepositoryUsers = getRepository(User)
+    let RepositorySalon = getRepository(Salon)
+    let RepositorySalonReview = getRepository(SalonReview)
+  
+    const user = await RepositoryUsers.findOne(req.user.id)
+    const salon = await RepositorySalon.findOne(req.params.id)
+
     if (salon == null) return res.status(404).send("No salon found")
     if (!checkAccountType(user)) {
 
@@ -258,7 +259,28 @@ export async function addReview(req, res) {
   }
 }
 
+//Get all reviews for salon
+
+//Get review by ID
 
 //Get all salons
+export async function getSalons(req, res) {
+  try {
+    let RepositorySalon = getRepository(Salon)
+    let RepositoryUsers = getRepository(User)
+
+    const salons = await RepositorySalon.find()
+    const user = await RepositoryUsers.findOne(req.user.id)
+
+    if (!checkAccountType(user)) {
+      return res.status(200).send(salons)
+    } else {
+     return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
 
 //Get salon by ID

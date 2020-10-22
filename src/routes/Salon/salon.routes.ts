@@ -34,10 +34,10 @@ Router.put("/salon/:id",
   CheckInputMiddleware, authenticateToken, SalonController.updateSalon)
 
 //Delete salon
-Router.delete("/salon/:id", authenticateToken, SalonController.deleteSalon)
+Router.delete("/salons/:id", authenticateToken, SalonController.deleteSalon)
 
 //Add new salon service
-Router.post("/salonservice/:id",
+Router.post("/salonsservice/:id",
   [
     check("offerTitle", "Offer title name can contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
     check("time", "Time can not be empty").not().isEmpty(),
@@ -46,24 +46,26 @@ Router.post("/salonservice/:id",
   CheckInputMiddleware, authenticateToken, SalonController.addSalonService)
 
 //Update salon service
-Router.put("/salonservice/:id",
+Router.put("/salonsservice/:id",
   [
     check("offerTitle", "Offer title name can contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
   ],
   CheckInputMiddleware, authenticateToken, SalonController.updateSalonService)
 
 //Delete salon service
-Router.delete("/salonservice/:id", authenticateToken, SalonController.deleteSalonService)
+Router.delete("/salonsservice/:id", authenticateToken, SalonController.deleteSalonService)
+
+//Get all salons
+Router.get("/salons",authenticateToken, SalonController.getSalons)
+
+//Get salon by ID
+//Router.get("/salons/:id",authenticateToken, SalonController.getSalon)
 
 //Add salon review
-Router.post("/review/:id", authenticateToken, SalonController.addReview)
+Router.post("/reviews/:id", authenticateToken, SalonController.addReview)
 
 //Get all reviews for salon
 
 //Get review by ID
-
-//Get all salons
-
-//Get salon by ID
 
 export { Router as SalonRoutes };
