@@ -53,7 +53,7 @@ Router.put("/salonservice/:id",
   CheckInputMiddleware, authenticateToken, SalonController.updateSalonService)
 
 //Delete salon service
-//Router.delete("/salonservice/:id", authenticateToken, SalonController.deleteSalonService)
+Router.delete("/salonservice/:id", authenticateToken, SalonController.deleteSalonService)
 
 //Add salon review
 

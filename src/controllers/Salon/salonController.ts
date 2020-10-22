@@ -201,6 +201,31 @@ export async function updateSalonService(req, res) {
 }
 
 //Delete salon service
+export async function deleteSalonService(req, res) {
+
+  let RepositoryUsers = getRepository(User)
+  let RepositorySalonService = getRepository(SalonService)
+
+  try {
+    const user = await RepositoryUsers.findOne(req.user.id)
+    const salonService = await RepositorySalonService.findOne(req.params.id)
+    
+    //Check if salon service exist
+    if (salonService == null) return res.status(404).send("No salon found")
+    if (checkAccountType(user)) {
+
+      await RepositorySalonService.delete(salonService);
+
+      res.send("Successfully deleted salon service " + salonService.offerTitle +  "( id: "+ salonService.id + ")")
+      return res.status(204)
+    } else {
+      return res.status(401).send("access denied ( route for salon account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
 
 //Add salon review ( for clients )
 
