@@ -56,6 +56,11 @@ Router.put("/salonservice/:id",
 Router.delete("/salonservice/:id", authenticateToken, SalonController.deleteSalonService)
 
 //Add salon review
+Router.post("/review/:id", authenticateToken, SalonController.addReview)
+
+//Get all reviews for salon
+
+//Get review by ID
 
 //Get all salons
 

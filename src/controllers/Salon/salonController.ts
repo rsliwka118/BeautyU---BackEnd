@@ -2,6 +2,7 @@ import { createHmac } from "crypto";
 import { getRepository } from "typeorm"
 import { Salon } from "../../entity/Salon/Salon"
 import { SalonLocation } from "../../entity/Salon/SalonLocation";
+import { SalonReview } from "../../entity/Salon/SalonReview";
 import { SalonService } from "../../entity/Salon/SalonService";
 import { User } from "../../entity/User/User"
 
@@ -152,11 +153,8 @@ export async function addSalonService(req, res) {
       NewService.time = req.body.time,
       NewService.price = req.body.price,
       NewService.salon = salon
-      await RepositorySalonService.save(NewService)
 
-      //Add Service to Salon
-      //salon.services = [NewService]
-      //await RepositorySalon.save(salon)
+      await RepositorySalonService.save(NewService)
 
       console.dir(NewService)
 
@@ -228,6 +226,38 @@ export async function deleteSalonService(req, res) {
 }
 
 //Add salon review ( for clients )
+export async function addReview(req, res) {
+  let RepositoryUsers = getRepository(User)
+  let RepositorySalon = getRepository(Salon)
+  let RepositorySalonReview = getRepository(SalonReview)
+  
+  const user = await RepositoryUsers.findOne(req.user.id)
+  const salon = await RepositorySalon.findOne(req.params.id)
+  try {
+    if (salon == null) return res.status(404).send("No salon found")
+    if (!checkAccountType(user)) {
+
+      //Add Review
+      let NewReview = new SalonReview()
+      NewReview.userID = user.id,
+      NewReview.review = req.body.review,
+      NewReview.rate = req.body.rate,
+      NewReview.salon = salon
+
+      await RepositorySalonReview.save(NewReview)
+
+      console.dir(NewReview)
+
+      return res.status(200).send("Successfuly added new review for " + salon.name + " by " + user.firstName + "!")
+  } else {
+      return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
 
 //Get all salons
 
