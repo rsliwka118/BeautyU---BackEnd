@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne
 import { SalonService } from "./SalonService"
 import { SalonReview } from "./SalonReview"
 import { SalonLocation } from "./SalonLocation"
+import { type } from "os"
 
 enum SalonType{
     Hairdresser="Hairdresser",
@@ -33,13 +34,12 @@ export class Salon {
   rate: number
 
   @Column()
-  hours: string //Day1&OpeningHour&ClosingHour&Day2...
+  hours: string //Day1&OpeningHour&ClosingHour%Day2...
 
-  @OneToMany( () => Salon, offer => SalonService )
-  @JoinColumn()
+  @OneToMany( type => SalonService, service => service.salon )
   services: SalonService[]
 
-  @OneToMany( () => Salon, review => SalonReview )
+  @OneToMany( type => SalonReview, review => review.salon )
   @JoinColumn()
   reviews: SalonReview[]
 

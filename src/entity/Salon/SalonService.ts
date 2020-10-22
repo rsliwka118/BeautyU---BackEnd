@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm"
+import { SpatialColumnOptions } from "typeorm/decorator/options/SpatialColumnOptions"
 import { Salon } from "./Salon"
 
 @Entity({ name: "salonService" })
@@ -15,7 +16,7 @@ export class SalonService {
   @Column()
   time: string
 
-  @ManyToOne( () => Salon, salon => salon.services)
-  salon: Salon;
+  @ManyToOne(type => Salon, salon =>salon.services)
+  salon: Salon
   
 }

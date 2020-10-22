@@ -20,7 +20,7 @@ function checkEmpty(param, existingItem){
 //Add new salon
 export async function addSalon(req, res) {
     let RepositoryUsers = getRepository(User)
-    let RepositorySalons = getRepository(Salon)
+    let RepositorySalon = getRepository(Salon)
     let RepositorySalonLocation = getRepository(SalonLocation)
     
     const user = await RepositoryUsers.findOne(req.user.id)
@@ -46,7 +46,7 @@ export async function addSalon(req, res) {
         NewSalon.hours = req.body.hours,
         NewSalon.location = NewLocation
 
-        await RepositorySalons.save(NewSalon)
+        await RepositorySalon.save(NewSalon)
         console.dir(NewSalon)
         res.send("Successfuly added new salon for " + user.firstName + "!")
 
@@ -67,33 +67,31 @@ export async function updateSalon(req, res) {
   let RepositorySalonLocation = getRepository(SalonLocation)
   
   const user = await RepositoryUsers.findOne(req.user.id)
-  const salonExist = await RepositorySalon.findOne(req.params.id)
-  const locationExist = await RepositorySalonLocation.findOne(salonExist.location)
+  const salon = await RepositorySalon.findOne(req.params.id)
+  const location = await RepositorySalonLocation.findOne(salon.location)
 
   try {
-    if (salonExist == null) return res.status(404).send("No salon found")
+    if (salon == null) return res.status(404).send("No salon found")
     if (checkAccountType(user)) {
 
       //Update Location
-      await RepositorySalonLocation.update(locationExist.id,
+      await RepositorySalonLocation.update(location.id,
         {
-          city: checkEmpty(req.body.city, locationExist.city),
-          code: checkEmpty(req.body.code, locationExist.code),
-          street: checkEmpty(req.body.street, locationExist.street),
-          houseNumber: checkEmpty(req.body.houseNumber, locationExist.houseNumber),
-          apartmentNumber: checkEmpty(req.body.apartmentNumber, locationExist.houseNumber)
-        }
-      )
+          city: checkEmpty(req.body.city, location.city),
+          code: checkEmpty(req.body.code, location.code),
+          street: checkEmpty(req.body.street, location.street),
+          houseNumber: checkEmpty(req.body.houseNumber, location.houseNumber),
+          apartmentNumber: checkEmpty(req.body.apartmentNumber, location.houseNumber)
+        })
 
       //Update Salon
       await RepositorySalon.update(req.params.id,
         {
-          name: checkEmpty(req.body.name, salonExist.name),
-          type: checkEmpty(req.body.type, salonExist.type),
-          describe: checkEmpty(req.body.describe, salonExist.describe),
-          hours: checkEmpty(req.body.hours, salonExist.hours)
-        }
-      )
+          name: checkEmpty(req.body.name, salon.name),
+          type: checkEmpty(req.body.type, salon.type),
+          describe: checkEmpty(req.body.describe, salon.describe),
+          hours: checkEmpty(req.body.hours, salon.hours)
+        })
 
       res.send("Successfuly updated salon for " + user.firstName + "!")
 
@@ -116,20 +114,19 @@ export async function deleteSalon(req, res) {
 
   try {
     const user = await RepositoryUsers.findOne(req.user.id)
-    console.log(req.user.id)
-    const salonExist = await RepositorySalon.findOne(req.params.id)
+    const salon = await RepositorySalon.findOne(req.params.id)
     
     //Check if salon exist
-    if (salonExist == null) return res.status(404).send("No salon found")
+    if (salon == null) return res.status(404).send("No salon found")
 
     //Check if owners password is correct
     if (user.password === createHmac("sha1", req.body.password).digest("hex")) {
-      const locationExist = await RepositorySalonLocation.findOne(salonExist.location)
+      const location = await RepositorySalonLocation.findOne(salon.location)
 
-      await RepositorySalon.delete(salonExist);
-      await RepositorySalonLocation.delete(locationExist);
+      await RepositorySalon.delete(salon);
+      await RepositorySalonLocation.delete(location);
 
-      res.send("Successfully deleted salon " + salonExist.name +  "( id: "+ salonExist.id + ")")
+      res.send("Successfully deleted salon " + salon.name +  "( id: "+ salon.id + ")")
       return res.status(204)
     } else {
       return res.status(401).send("The correct password is required to delete the salon")
@@ -141,6 +138,41 @@ export async function deleteSalon(req, res) {
 }
 
 //Add new salon service
+export async function addSalonService(req, res) {
+  let RepositoryUsers = getRepository(User)
+  let RepositorySalon = getRepository(Salon)
+  let RepositorySalonService = getRepository(SalonService)
+  
+  const user = await RepositoryUsers.findOne(req.user.id)
+  const salon = await RepositorySalon.findOne(req.params.id)
+  try {
+    if (salon == null) return res.status(404).send("No salon found")
+    if (checkAccountType(user)) {
+
+      //Add Service
+      let NewService = new SalonService()
+      NewService.offerTitle = req.body.offerTitle,
+      NewService.time = req.body.time,
+      NewService.price = req.body.price,
+     
+      await RepositorySalonService.save(NewService)
+
+      //Add Service to Salon
+      salon.services = [NewService]
+      await RepositorySalon.save(salon)
+
+      console.dir(NewService)
+      res.send("Successfuly added new service for " + salon.name + "!")
+
+      return res.status(200)
+  } else {
+      return res.status(400).send("access denied ( route for salon account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
 
 //Update salon service
 

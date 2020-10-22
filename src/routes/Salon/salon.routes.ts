@@ -35,7 +35,15 @@ Router.put("/salon/:id",
 
 //Delete salon
 Router.delete("/salon/:id", authenticateToken, SalonController.deleteSalon)
+
 //Add new salon service
+Router.post("/salonservice/:id",
+  [
+    check("offerTitle", "Offer title name can contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
+    check("time", "Time can not be empty").not().isEmpty(),
+    check("price", "Price can not be empty").not().isEmpty(),
+  ],
+  CheckInputMiddleware, authenticateToken, SalonController.addSalonService)
 
 //Update salon service
 

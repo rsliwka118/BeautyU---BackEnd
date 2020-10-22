@@ -18,7 +18,7 @@ export class SalonReview {
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   dateAdded: string
 
-  @ManyToOne( () => Salon, salon => salon.services)
+  @ManyToOne( type => Salon, salon => salon.reviews)
   salon: Salon;
 
 }
