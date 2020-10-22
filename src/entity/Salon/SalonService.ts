@@ -16,7 +16,7 @@ export class SalonService {
   @Column()
   time: string
 
-  @ManyToOne(type => Salon, salon =>salon.services)
+  @ManyToOne( () => Salon, salon => salon.services)
   salon: Salon
   
 }

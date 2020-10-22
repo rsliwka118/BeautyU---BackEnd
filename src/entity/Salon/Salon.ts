@@ -36,12 +36,12 @@ export class Salon {
   @Column()
   hours: string //Day1&OpeningHour&ClosingHour%Day2...
 
-  @OneToMany( type => SalonService, service => service.salon )
+  @OneToMany( () => SalonService, service => service.salon )
   services: SalonService[]
 
-  @OneToMany( type => SalonReview, review => review.salon )
-  @JoinColumn()
-  reviews: SalonReview[]
+  // @OneToMany( type => SalonReview, review => review.salon )
+  // @JoinColumn()
+  // reviews: SalonReview[]
 
   @OneToOne( location => SalonLocation )
   @JoinColumn()

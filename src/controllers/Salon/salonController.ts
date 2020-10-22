@@ -151,12 +151,12 @@ export async function addSalonService(req, res) {
       NewService.offerTitle = req.body.offerTitle,
       NewService.time = req.body.time,
       NewService.price = req.body.price,
-     
+      NewService.salon = salon
       await RepositorySalonService.save(NewService)
 
       //Add Service to Salon
-      salon.services = [NewService]
-      await RepositorySalon.save(salon)
+      //salon.services = [NewService]
+      //await RepositorySalon.save(salon)
 
       console.dir(NewService)
 
