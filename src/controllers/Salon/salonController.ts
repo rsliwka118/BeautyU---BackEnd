@@ -2,6 +2,7 @@ import { createHmac } from "crypto";
 import { getRepository } from "typeorm"
 import { Salon } from "../../entity/Salon/Salon"
 import { SalonLocation } from "../../entity/Salon/SalonLocation";
+import { SalonRate } from "../../entity/Salon/SalonRate";
 import { SalonReview } from "../../entity/Salon/SalonReview";
 import { SalonService } from "../../entity/Salon/SalonService";
 import { User } from "../../entity/User/User"
@@ -242,7 +243,6 @@ export async function addReview(req, res) {
       let NewReview = new SalonReview()
       NewReview.userID = user.id,
       NewReview.review = req.body.review,
-      NewReview.rate = req.body.rate,
       NewReview.salon = salon
 
       await RepositorySalonReview.save(NewReview)
@@ -264,8 +264,45 @@ export async function addReview(req, res) {
 //Get review by ID
 
 //Add rate for salon
+export async function addRate(req, res) {
+  try {
+    let RepositoryUsers = getRepository(User)
+    let RepositorySalon = getRepository(Salon)
+    let RepositorySalonRate = getRepository(SalonRate)
+  
+    const user = await RepositoryUsers.findOne(req.user.id)
+    const salon = await RepositorySalon.findOne(req.params.id)
+    const rateExists = await RepositorySalonRate.findOne({user: user, salon: salon})
 
-//Update rate for salon
+    if (salon == null) return res.status(404).send("No salon found")
+    if (!checkAccountType(user)) {
+      
+      //Check if rate for salon by user is already exist
+      if(rateExists == null){
+        //Add Rate
+        let NewRate = new SalonRate()
+        NewRate.rate = req.body.rate,
+        NewRate.salon = salon,
+        NewRate.user = user
+
+        await RepositorySalonRate.save(NewRate)
+
+        console.dir(NewRate)
+
+        return res.status(200).send("Successfuly rated " + salon.name + " by " + user.firstName + "!")
+      } else {
+        //Update Rate
+        await RepositorySalonRate.update(rateExists.id, { rate: req.body.rate })
+        return res.status(200).send("Successfuly updated rate for " + salon.name + " by " + user.firstName + "!")
+      }
+  } else {
+      return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
 
 //Get all salons
 export async function getSalons(req, res) {
