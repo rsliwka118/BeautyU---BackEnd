@@ -136,6 +136,53 @@ export async function deleteSalon(req, res) {
   }
 }
 
+//Get all salons
+export async function getSalons(req, res) {
+  try {
+    let RepositorySalon = getRepository(Salon)
+    let RepositoryUsers = getRepository(User)
+
+    const salons = await RepositorySalon.find()
+    const user = await RepositoryUsers.findOne(req.user.id)
+
+    if (!checkAccountType(user)) {
+      return res.status(200).send(salons)
+    } else {
+     return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
+//Get salon by ID
+export async function getSalonByID(req, res) {
+  try {
+    let RepositorySalon = getRepository(Salon)
+    let RepositoryUsers = getRepository(User)
+
+    const salon = await RepositorySalon.findOne(req.params.id)
+    const user = await RepositoryUsers.findOne(req.user.id)
+
+    if (!checkAccountType(user)) {
+
+      if (!salon) {
+        res.status(404)
+        res.end()
+        return
+      }
+
+      return res.status(200).send(salon)
+    } else {
+     return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
 //Add new salon service
 export async function addSalonService(req, res) {
   let RepositoryUsers = getRepository(User)
@@ -260,8 +307,32 @@ export async function addReview(req, res) {
 }
 
 //Get all reviews for salon
+export async function getReviews(req, res) {
+  try {
+    let RepositorySalon = getRepository(Salon)
+    let RepositorySalonReview = getRepository(SalonReview)
+    let RepositorySalonRate = getRepository(SalonRate)
 
-//Get review by ID
+    const salon = await RepositorySalon.findOne(req.params.id)
+  
+    if (!salon) {
+      res.status(404)
+      res.end()
+      return
+    }
+
+    const reviews = await RepositorySalonReview
+    .createQueryBuilder('review')
+    .innerJoinAndMapOne("review.rate", SalonRate, 'rate', 'review.salon = rate.salon and review.userID = rate.user.id')
+    .getMany()
+
+    return res.status(200).send(reviews)
+    
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
 
 //Add rate for salon
 export async function addRate(req, res) {
@@ -276,7 +347,6 @@ export async function addRate(req, res) {
 
     if (salon == null) return res.status(404).send("No salon found")
     if (!checkAccountType(user)) {
-      
       //Check if rate for salon by user is already exist
       if(rateExists == null){
         //Add Rate
@@ -297,53 +367,6 @@ export async function addRate(req, res) {
       }
   } else {
       return res.status(400).send("access denied ( route for client account )")
-    }
-  } catch (Error) {
-    console.error(Error)
-    return res.status(500).send("server err")
-  }
-}
-
-//Get all salons
-export async function getSalons(req, res) {
-  try {
-    let RepositorySalon = getRepository(Salon)
-    let RepositoryUsers = getRepository(User)
-
-    const salons = await RepositorySalon.find()
-    const user = await RepositoryUsers.findOne(req.user.id)
-
-    if (!checkAccountType(user)) {
-      return res.status(200).send(salons)
-    } else {
-     return res.status(400).send("access denied ( route for client account )")
-    }
-  } catch (Error) {
-    console.error(Error)
-    return res.status(500).send("server err")
-  }
-}
-
-//Get salon by ID
-export async function getSalonByID(req, res) {
-  try {
-    let RepositorySalon = getRepository(Salon)
-    let RepositoryUsers = getRepository(User)
-
-    const salon = await RepositorySalon.findOne(req.params.id)
-    const user = await RepositoryUsers.findOne(req.user.id)
-
-    if (!checkAccountType(user)) {
-
-      if (!salon) {
-        res.status(404)
-        res.end()
-        return
-      }
-
-      return res.status(200).send(salon)
-    } else {
-     return res.status(400).send("access denied ( route for client account )")
     }
   } catch (Error) {
     console.error(Error)

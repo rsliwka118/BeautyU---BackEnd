@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from "typeorm"
 import { Salon } from "./Salon"
+import { SalonRate } from "./SalonRate"
 
 @Entity({ name: "salonReview" })
 export class SalonReview {

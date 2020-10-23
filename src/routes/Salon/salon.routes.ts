@@ -36,6 +36,12 @@ Router.put("/salon/:id",
 //Delete salon
 Router.delete("/salons/:id", authenticateToken, SalonController.deleteSalon)
 
+//Get all salons
+Router.get("/salons",authenticateToken, SalonController.getSalons)
+
+//Get salon by ID
+Router.get("/salons/:id",authenticateToken, SalonController.getSalonByID)
+
 //Add new salon service
 Router.post("/salonsservice/:id",
   [
@@ -55,18 +61,11 @@ Router.put("/salonsservice/:id",
 //Delete salon service
 Router.delete("/salonsservice/:id", authenticateToken, SalonController.deleteSalonService)
 
-//Get all salons
-Router.get("/salons",authenticateToken, SalonController.getSalons)
-
-//Get salon by ID
-Router.get("/salons/:id",authenticateToken, SalonController.getSalonByID)
-
 //Add salon review
 Router.post("/reviews/:id", authenticateToken, SalonController.addReview)
 
 //Get all reviews for salon
-
-//Get review by ID
+Router.get("/reviews/:id", authenticateToken, SalonController.getReviews)
 
 //Add rate for salon
 Router.post("/rate/:id", authenticateToken, SalonController.addRate)

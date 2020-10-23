@@ -3,6 +3,7 @@ import { SalonService } from "./SalonService"
 import { SalonReview } from "./SalonReview"
 import { SalonLocation } from "./SalonLocation"
 import { type } from "os"
+import { SalonRate } from "./SalonRate"
 
 enum SalonType{
     Hairdresser="Hairdresser",
@@ -46,5 +47,8 @@ export class Salon {
   @OneToOne( location => SalonLocation )
   @JoinColumn()
   location: SalonLocation
+
+  @OneToMany( () => SalonRate, rate => rate.salon )
+  rates: SalonReview[]
 
 }
