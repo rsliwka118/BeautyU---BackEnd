@@ -68,4 +68,8 @@ Router.post("/reviews/:id", authenticateToken, SalonController.addReview)
 
 //Get review by ID
 
+//Add rate for salon
+
+//Update rate for salon
+
 export { Router as SalonRoutes };

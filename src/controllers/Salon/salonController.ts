@@ -263,6 +263,10 @@ export async function addReview(req, res) {
 
 //Get review by ID
 
+//Add rate for salon
+
+//Update rate for salon
+
 //Get all salons
 export async function getSalons(req, res) {
   try {

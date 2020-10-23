@@ -12,9 +12,6 @@ export class SalonReview {
   @Column()
   review: string
 
-  @Column()
-  rate: string
-
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   dateAdded: string
 
