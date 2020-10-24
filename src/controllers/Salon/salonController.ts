@@ -147,7 +147,7 @@ export async function getSalons(req, res) {
     const user = await RepositoryUsers.findOne(req.user.id)
 
     if (!checkAccountType(user)) {
-      
+
       const salons = await RepositorySalon
       .createQueryBuilder('salons')
       .innerJoinAndMapMany("salons.services", SalonService, 'service', 'salons.id = service.salon')
@@ -169,16 +169,22 @@ export async function getSalonByID(req, res) {
     let RepositorySalon = getRepository(Salon)
     let RepositoryUsers = getRepository(User)
 
-    const salon = await RepositorySalon.findOne(req.params.id)
+    //const salon = await RepositorySalon.findOne(req.params.id)
     const user = await RepositoryUsers.findOne(req.user.id)
 
     if (!checkAccountType(user)) {
 
-      if (!salon) {
-        res.status(404)
-        res.end()
-        return
-      }
+     // if (!salon) {
+     //   res.status(404)
+     //   res.end()
+     //   return
+     // }
+
+      const salon = await RepositorySalon
+      .createQueryBuilder('salon')
+      .innerJoinAndMapMany("salon.services", SalonService, 'service', 'salon.id = service.salon')
+      .where('salon.id = :salonId', { salonId: req.params.id})
+      .getOne()
 
       return res.status(200).send(salon)
     } else {
