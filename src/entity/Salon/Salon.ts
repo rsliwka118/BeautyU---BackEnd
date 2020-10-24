@@ -31,8 +31,6 @@ export class Salon {
   @Column()
   describe: string
 
-  @Column()
-  rate: number
 
   @Column()
   hours: string //Day1&OpeningHour&ClosingHour%Day2...
@@ -48,6 +46,6 @@ export class Salon {
   location: SalonLocation
 
   @OneToMany( () => SalonRate, rate => rate.salon )
-  rates: SalonReview[]
+  rates: SalonRate[]
 
 }

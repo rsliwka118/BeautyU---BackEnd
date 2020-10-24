@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany, ManyToOne } from "typeorm"
 import { Salon } from "./Salon"
 import { User } from "../User/User"
-import { SalonReview } from "./SalonReview"
 
 @Entity({ name: "salonRate" })
 export class SalonRate {
@@ -11,11 +10,12 @@ export class SalonRate {
   @Column()
   rate: string
 
-  @OneToOne( user => User )
+  @ManyToOne( user => User )
   @JoinColumn()
   user: User
 
   @ManyToOne( () => Salon, salon => salon.rates )
+  @JoinColumn()
   salon: Salon;
 
 }

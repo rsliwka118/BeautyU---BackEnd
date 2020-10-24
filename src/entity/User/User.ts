@@ -1,5 +1,6 @@
 import { createHmac } from "crypto"
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, ManyToMany, JoinTable, OneToMany } from "typeorm"
+import { SalonRate } from "../Salon/SalonRate"
 
 enum AccoutType{
   Admin="Admin",
@@ -26,6 +27,9 @@ export class User {
 
   @Column()
   password: string
+  
+  @OneToMany( () => SalonRate, rate => rate.user )
+  rates: SalonRate[]
 
   @BeforeInsert()
   @BeforeUpdate()

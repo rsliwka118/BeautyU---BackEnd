@@ -1,16 +1,16 @@
 import { createHmac } from "crypto";
 import { getRepository } from "typeorm"
 import { Salon } from "../../entity/Salon/Salon"
-import { SalonLocation } from "../../entity/Salon/SalonLocation";
-import { SalonRate } from "../../entity/Salon/SalonRate";
-import { SalonReview } from "../../entity/Salon/SalonReview";
-import { SalonService } from "../../entity/Salon/SalonService";
+import { SalonLocation } from "../../entity/Salon/SalonLocation"
+import { SalonRate } from "../../entity/Salon/SalonRate"
+import { SalonReview } from "../../entity/Salon/SalonReview"
+import { SalonService } from "../../entity/Salon/SalonService"
 import { User } from "../../entity/User/User"
 
 //Check type of user account
 function checkAccountType(user) {
-    if(user.accountType === "Client") return 0;
-    if(user.accountType === "Salon") return 1;
+    if(user.accountType === "Client") return 0
+    if(user.accountType === "Salon") return 1
 }
 
 //Check if parameter is equal null ( for update functions )
@@ -149,8 +149,10 @@ export async function getSalons(req, res) {
     if (!checkAccountType(user)) {
 
       const salons = await RepositorySalon
-      .createQueryBuilder('salons')
-      .innerJoinAndMapMany("salons.services", SalonService, 'service', 'salons.id = service.salon')
+      .createQueryBuilder('salon')
+      .leftJoinAndMapOne("salon.location", SalonLocation, 'location', 'salon.locationID = location.id')
+      .innerJoinAndMapMany("salon.services", SalonService, 'service', 'salon.id = service.salon')
+      .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
       .getMany()
 
       return res.status(200).send(salons)
@@ -182,8 +184,10 @@ export async function getSalonByID(req, res) {
 
       const salon = await RepositorySalon
       .createQueryBuilder('salon')
+      .leftJoinAndMapOne("salon.location", SalonLocation, 'location', 'salon.locationID = location.id')
       .innerJoinAndMapMany("salon.services", SalonService, 'service', 'salon.id = service.salon')
-      .where('salon.id = :salonId', { salonId: req.params.id})
+      .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
+      .where('salon.id = :salonId', { salonId: req.params.id })
       .getOne()
 
       return res.status(200).send(salon)
