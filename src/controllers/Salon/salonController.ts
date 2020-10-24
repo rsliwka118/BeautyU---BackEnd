@@ -73,6 +73,7 @@ export async function updateSalon(req, res) {
 
   try {
     if (salon == null) return res.status(404).send("No salon found")
+    if (salon.ownerID != user.id) return res.status(403).send("You are not the owner of this salon")
     if (checkAccountType(user)) {
 
       //Update Location
@@ -142,10 +143,16 @@ export async function getSalons(req, res) {
     let RepositorySalon = getRepository(Salon)
     let RepositoryUsers = getRepository(User)
 
-    const salons = await RepositorySalon.find()
+    //const salons = await RepositorySalon.find()
     const user = await RepositoryUsers.findOne(req.user.id)
 
     if (!checkAccountType(user)) {
+      
+      const salons = await RepositorySalon
+      .createQueryBuilder('salons')
+      .innerJoinAndMapMany("salons.services", SalonService, 'service', 'salons.id = service.salon')
+      .getMany()
+
       return res.status(200).send(salons)
     } else {
      return res.status(400).send("access denied ( route for client account )")
@@ -193,6 +200,7 @@ export async function addSalonService(req, res) {
   const salon = await RepositorySalon.findOne(req.params.id)
   try {
     if (salon == null) return res.status(404).send("No salon found")
+    if (salon.ownerID != user.id) return res.status(403).send("You are not the owner of this salon")
     if (checkAccountType(user)) {
 
       //Add Service

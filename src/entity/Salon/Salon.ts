@@ -41,7 +41,6 @@ export class Salon {
   services: SalonService[]
 
   @OneToMany( () => SalonReview, review => review.salon )
-  @JoinColumn()
   reviews: SalonReview[]
 
   @OneToOne( location => SalonLocation )

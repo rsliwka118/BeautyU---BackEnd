@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm"
 import { SpatialColumnOptions } from "typeorm/decorator/options/SpatialColumnOptions"
 import { Salon } from "./Salon"
 
