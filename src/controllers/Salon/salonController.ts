@@ -1,12 +1,11 @@
 import { createHmac } from "crypto";
-import { getRepository } from "typeorm"
+import { getRepository, getManager } from "typeorm"
 import { Salon } from "../../entity/Salon/Salon"
 import { SalonLocation } from "../../entity/Salon/SalonLocation"
 import { SalonRate } from "../../entity/Salon/SalonRate"
 import { SalonReview } from "../../entity/Salon/SalonReview"
 import { SalonService } from "../../entity/Salon/SalonService"
 import { User } from "../../entity/User/User"
-
 //Check type of user account
 function checkAccountType(user) {
     if(user.accountType === "Client") return 0
@@ -137,6 +136,35 @@ export async function deleteSalon(req, res) {
   }
 }
 
+//Get salons preview (category)
+export async function getPreviews(req, res) {
+  try {
+    let RepositorySalon = getRepository(Salon)
+    let RepositoryUsers = getRepository(User)
+
+    //const salons = await RepositorySalon.find()
+    const user = await RepositoryUsers.findOne(req.user.id)
+
+    if (!checkAccountType(user)) {
+
+      const salons = await getManager()
+      .createQueryBuilder(Salon, 'salon')
+      .select(['salon.id','salon.name'])
+      .where('salon.type = :type',{ type: req.params.type})
+      .leftJoinAndMapOne('salon.location', SalonLocation, 'location', 'salon.locationID = location.id')
+      .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
+      .getMany();
+
+      return res.status(200).json({salons: salons})
+    } else {
+     return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
 //Get all salons
 export async function getSalons(req, res) {
   try {
@@ -155,7 +183,7 @@ export async function getSalons(req, res) {
       .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
       .getMany()
 
-      return res.status(200).send(salons)
+      return res.status(200).json({salons: salons})
     } else {
      return res.status(400).send("access denied ( route for client account )")
     }
@@ -359,7 +387,7 @@ export async function addRate(req, res) {
     let RepositorySalon = getRepository(Salon)
     let RepositorySalonRate = getRepository(SalonRate)
   
-    const user = await RepositoryUsers.findOne(req.user.id)
+    const user = await RepositoryUsers.findOne(req.body.data.id)
     const salon = await RepositorySalon.findOne(req.params.id)
     const rateExists = await RepositorySalonRate.findOne({user: user, salon: salon})
 
@@ -368,8 +396,9 @@ export async function addRate(req, res) {
       //Check if rate for salon by user is already exist
       if(rateExists == null){
         //Add Rate
+        let message = {message: "Dodano ocenę " + req.body.data.rate + "!"}
         let NewRate = new SalonRate()
-        NewRate.rate = req.body.rate,
+        NewRate.rate = req.body.data.rate,
         NewRate.salon = salon,
         NewRate.user = user
 
@@ -377,11 +406,12 @@ export async function addRate(req, res) {
 
         console.dir(NewRate)
 
-        return res.status(200).send("Successfuly rated " + salon.name + " by " + user.firstName + "!")
+        return res.status(200).send(message)
       } else {
         //Update Rate
-        await RepositorySalonRate.update(rateExists.id, { rate: req.body.rate })
-        return res.status(200).send("Successfuly updated rate for " + salon.name + " by " + user.firstName + "!")
+        let message = {message: "Zmieniono ocenę na "+ req.body.data.rate + "!"}
+        await RepositorySalonRate.update(rateExists.id, { rate: req.body.data.rate })
+        return res.status(200).send(message)
       }
   } else {
       return res.status(400).send("access denied ( route for client account )")

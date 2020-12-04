@@ -10,6 +10,6 @@ export default async function CheckInputMiddleware(req, res, next)
     }
     else
     {
-        return res.status(400).json({ errors: errors.array() })
+        return res.status(401).json({ errors: errors.array() })
     }
 }

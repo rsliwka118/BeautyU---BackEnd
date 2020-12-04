@@ -4,17 +4,20 @@ import * as express from "express";
 import * as AuthController from "../../controllers/User/authController";
 
 import CheckInputMiddleware from "../../middlewares/input.middlewares";
-
+import authenticateToken from "../../middlewares/authenticateToken.middlewares";
+import { RelationCountAttribute } from "typeorm/query-builder/relation-count/RelationCountAttribute";
 
 var Router = express.Router();
+//Get details
+Router.post("/details", authenticateToken, AuthController.details)
 
 //Register
 Router.post("/register",
   [
-    check("firstName", "Incorrect firstName").trim().isLength({ min: 1, max: 50 }),
-    check("lastName", "Incorrect lastName").trim().isLength({ min: 1, max: 50 }),
-    check("email", "Incorrect email").isEmail(),
-    check("password", "Incorrect password (8-20 characters)").isLength({ min: 8, max: 20 }).matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})")
+    check("data.firstName", "Incorrect firstName").trim().isLength({ min: 1, max: 50 }),
+    check("data.lastName", "Incorrect lastName").trim().isLength({ min: 1, max: 50 }),
+    check("data.email", "Incorrect email").isEmail(),
+    check("data.password", "Incorrect password (8-20 characters)").isLength({ min: 8, max: 20 }).matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})")
   ],
   CheckInputMiddleware, AuthController.register);
 
@@ -27,5 +30,7 @@ Router.post("/token", AuthController.refreshToken);
 //Logout
 Router.delete("/logout", AuthController.logout);
 
+//CheckToken
+Router.get("/checktoken", authenticateToken, AuthController.checkToken)
 
 export { Router as LoginRoutes };

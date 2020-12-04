@@ -39,6 +39,9 @@ Router.delete("/salons/:id", authenticateToken, SalonController.deleteSalon)
 //Get all salons
 Router.get("/salons",authenticateToken, SalonController.getSalons)
 
+//Get previews (category)
+Router.get("/previews/:type",authenticateToken, SalonController.getPreviews)
+
 //Get salon by ID
 Router.get("/salons/:id",authenticateToken, SalonController.getSalonByID)
 
