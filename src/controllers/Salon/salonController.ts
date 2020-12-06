@@ -1,6 +1,7 @@
 import { createHmac } from "crypto";
 import { getRepository, getManager } from "typeorm"
 import { Salon } from "../../entity/Salon/Salon"
+import { SalonFav } from "../../entity/Salon/SalonFav";
 import { SalonLocation } from "../../entity/Salon/SalonLocation"
 import { SalonRate } from "../../entity/Salon/SalonRate"
 import { SalonReview } from "../../entity/Salon/SalonReview"
@@ -413,6 +414,39 @@ export async function addRate(req, res) {
         await RepositorySalonRate.update(rateExists.id, { rate: req.body.data.rate })
         return res.status(200).send(message)
       }
+  } else {
+      return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
+//Add favorite salon
+export async function addFav(req, res) {
+  try {
+    let RepositoryUsers = getRepository(User)
+    let RepositorySalon = getRepository(Salon)
+    let RepositorySalonFav = getRepository(SalonFav)
+  
+    const user = await RepositoryUsers.findOne(req.params.id)
+    const salon = await RepositorySalon.findOne(req.body.data.salonId)
+
+    if (salon == null) return res.status(404).send("No salon found")
+    if (!checkAccountType(user)) {
+      //Add Fav
+      let message = {message: "Dodano do ulubionych!"}
+      let NewFav = new SalonFav()
+      NewFav.salon = salon,
+      NewFav.user = user
+
+      await RepositorySalonFav.save(NewFav)
+
+      console.dir(NewFav)
+
+      return res.status(200).send(message)
+     
   } else {
       return res.status(400).send("access denied ( route for client account )")
     }

@@ -73,4 +73,7 @@ Router.get("/reviews/:id", authenticateToken, SalonController.getReviews)
 //Add rate for salon
 Router.post("/rate/:id", authenticateToken, SalonController.addRate)
 
+//Add fav salon
+Router.post("/fav/:id", authenticateToken, SalonController.addFav)
+
 export { Router as SalonRoutes };

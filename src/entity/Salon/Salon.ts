@@ -4,6 +4,7 @@ import { SalonReview } from "./SalonReview"
 import { SalonLocation } from "./SalonLocation"
 import { type } from "os"
 import { SalonRate } from "./SalonRate"
+import { SalonFav } from "./SalonFav"
 
 enum SalonType{
     Hairdresser="Hairdresser",
@@ -33,7 +34,7 @@ export class Salon {
 
 
   @Column()
-  hours: string //Day1&OpeningHour&ClosingHour%Day2...
+  hours: string //open&close#opec&close...
 
   @OneToMany( () => SalonService, service => service.salon )
   services: SalonService[]
@@ -47,5 +48,8 @@ export class Salon {
 
   @OneToMany( () => SalonRate, rate => rate.salon )
   rates: SalonRate[]
+
+  @OneToMany( () => SalonFav, id => id.salon)
+  favorites: SalonFav[]
 
 }
