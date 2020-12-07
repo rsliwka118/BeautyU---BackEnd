@@ -7,12 +7,9 @@ export class SalonFav {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @ManyToOne( user => User )
-  @JoinColumn()
-  user: User
+  @Column()
+  salon: string
 
-  @ManyToOne( () => Salon, salon => salon.id )
-  @JoinColumn()
-  salon: Salon;
-
+  @Column()
+  user: string
 }

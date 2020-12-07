@@ -1,8 +1,9 @@
 import { createHmac } from "crypto"
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, ManyToMany, JoinTable, OneToMany } from "typeorm"
 import { Salon } from "../Salon/Salon"
-import { SalonRate } from "../Salon/SalonRate"
 import { SalonFav } from "../Salon/SalonFav"
+import { SalonRate } from "../Salon/SalonRate"
+// import { SalonFav } from "../Salon/SalonFav"
 
 enum AccoutType{
   Admin="Admin",
@@ -32,10 +33,7 @@ export class User {
   
   @OneToMany( () => SalonRate, rate => rate.user )
   rates: SalonRate[]
-
-  @OneToMany( () => SalonFav, id => id.user)
-  favorites: Salon[]
-
+  
   @BeforeInsert()
   @BeforeUpdate()
   hashPassword() {

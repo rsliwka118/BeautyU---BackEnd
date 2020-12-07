@@ -142,6 +142,7 @@ export async function getPreviews(req, res) {
   try {
     let RepositorySalon = getRepository(Salon)
     let RepositoryUsers = getRepository(User)
+    let RepositoryFav = getRepository(SalonFav)
 
     //const salons = await RepositorySalon.find()
     const user = await RepositoryUsers.findOne(req.user.id)
@@ -154,9 +155,14 @@ export async function getPreviews(req, res) {
       .where('salon.type = :type',{ type: req.params.type})
       .leftJoinAndMapOne('salon.location', SalonLocation, 'location', 'salon.locationID = location.id')
       .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
-      .getMany();
+      .getMany()
 
-      return res.status(200).json({salons: salons})
+      const favorites = await getManager()
+      .createQueryBuilder(SalonFav, 'salonFav')
+      .select('salonFav.salon')
+      .getMany()
+
+      return res.status(200).json({salons: salons ,favorites: favorites})
     } else {
      return res.status(400).send("access denied ( route for client account )")
     }
@@ -438,8 +444,8 @@ export async function addFav(req, res) {
       //Add Fav
       let message = {message: "Dodano do ulubionych!"}
       let NewFav = new SalonFav()
-      NewFav.salon = salon,
-      NewFav.user = user
+      NewFav.salon = salon.id,
+      NewFav.user = user.id
 
       await RepositorySalonFav.save(NewFav)
 
@@ -473,6 +479,32 @@ export async function deleteFav(req, res) {
       const fav = await RepositorySalonFav.findOne({ where: { user: user.id, salon: salon.id } })
 
       await RepositorySalonFav.delete(fav);
+      return res.status(200).send(message)
+     
+  } else {
+      return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
+//Get fav salons
+export async function getFav(req, res) {
+  try {
+    let RepositoryUsers = getRepository(User)
+    let RepositorySalon = getRepository(Salon)
+    let RepositorySalonFav = getRepository(SalonFav)
+  
+    const user = await RepositoryUsers.findOne(req.params.id)
+    const salon = await RepositorySalon.findOne(req.body.data.salonId)
+
+    if (salon == null) return res.status(404).send("No salon found")
+    if (!checkAccountType(user)) {
+      //Add Fav
+      let message = {message: "Usunięto z ulubionych."}
+
       return res.status(200).send(message)
      
   } else {
