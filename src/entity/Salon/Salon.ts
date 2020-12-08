@@ -48,4 +48,6 @@ export class Salon {
 
   @OneToMany( () => SalonRate, rate => rate.salon )
   rates: SalonRate[]
+
+  fav: any
 }

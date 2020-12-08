@@ -160,9 +160,10 @@ export async function getPreviews(req, res) {
       const favorites = await getManager()
       .createQueryBuilder(SalonFav, 'salonFav')
       .select('salonFav.salon')
+      .where('salonFav.user = :id', {id: req.user.id})
       .getMany()
-
-      return res.status(200).json({salons: salons ,favorites: favorites})
+      
+      return res.status(200).json({salons ,favorites})
     } else {
      return res.status(400).send("access denied ( route for client account )")
     }
@@ -204,6 +205,7 @@ export async function getSalons(req, res) {
 export async function getSalonByID(req, res) {
   try {
     let RepositorySalon = getRepository(Salon)
+    let RepositorySalonService = getRepository(SalonService)
     let RepositoryUsers = getRepository(User)
 
     //const salon = await RepositorySalon.findOne(req.params.id)
@@ -220,12 +222,18 @@ export async function getSalonByID(req, res) {
       const salon = await RepositorySalon
       .createQueryBuilder('salon')
       .leftJoinAndMapOne("salon.location", SalonLocation, 'location', 'salon.locationID = location.id')
-      .innerJoinAndMapMany("salon.services", SalonService, 'service', 'salon.id = service.salon')
+      //.innerJoinAndMapMany("salon.services", SalonService, 'service', 'salon.id = service.salon')
       .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
       .where('salon.id = :salonId', { salonId: req.params.id })
       .getOne()
 
-      return res.status(200).send(salon)
+      const services = await RepositorySalonService
+      .createQueryBuilder('services')
+      .select('services')
+      .where('salonId = :id', {id: req.params.id})
+      .getMany()
+    
+      return res.status(200).send({salon, services})
     } else {
      return res.status(400).send("access denied ( route for client account )")
     }
@@ -437,8 +445,8 @@ export async function addFav(req, res) {
     let RepositorySalonFav = getRepository(SalonFav)
   
     const user = await RepositoryUsers.findOne(req.params.id)
-    const salon = await RepositorySalon.findOne(req.body.data.salonId)
-
+    const salon = await RepositorySalon.findOne(req.body.data.id)
+    console.log(req.body.data.id)
     if (salon == null) return res.status(404).send("No salon found")
     if (!checkAccountType(user)) {
       //Add Fav
@@ -469,8 +477,8 @@ export async function deleteFav(req, res) {
     let RepositorySalon = getRepository(Salon)
     let RepositorySalonFav = getRepository(SalonFav)
   
-    const user = await RepositoryUsers.findOne(req.params.id)
-    const salon = await RepositorySalon.findOne(req.body.data.salonId)
+    const user = await RepositoryUsers.findOne(req.params.user)
+    const salon = await RepositorySalon.findOne(req.params.salon)
 
     if (salon == null) return res.status(404).send("No salon found")
     if (!checkAccountType(user)) {
@@ -498,14 +506,23 @@ export async function getFav(req, res) {
     let RepositorySalonFav = getRepository(SalonFav)
   
     const user = await RepositoryUsers.findOne(req.params.id)
-    const salon = await RepositorySalon.findOne(req.body.data.salonId)
+    const favList = req.body.data.favList
 
-    if (salon == null) return res.status(404).send("No salon found")
+    if ( user == null ) return res.status(404).send("No user found")
+    if ( favList.length === 0) return res.status(404).send("No favs found")
+    
     if (!checkAccountType(user)) {
-      //Add Fav
-      let message = {message: "Usunięto z ulubionych."}
 
-      return res.status(200).send(message)
+      //Fav list
+      const favorites = await getManager()
+      .createQueryBuilder(Salon, 'salon')
+      .select(['salon.id','salon.name'])
+      .where('salon.id IN (:favs)',{ favs: favList })
+      .leftJoinAndMapOne('salon.location', SalonLocation, 'location', 'salon.locationID = location.id')
+      .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
+      .getMany()
+
+      return res.status(200).send(favorites)
      
   } else {
       return res.status(400).send("access denied ( route for client account )")

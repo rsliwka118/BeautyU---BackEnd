@@ -77,9 +77,9 @@ Router.post("/rate/:id", authenticateToken, SalonController.addRate)
 Router.post("/fav/:id", authenticateToken, SalonController.addFav)
 
 //Remove fav salon
-Router.delete("/fav/:id", authenticateToken, SalonController.deleteFav)
+Router.delete("/fav/:user/:salon", authenticateToken, SalonController.deleteFav)
 
 //Get fav salons
-Router.get("/myfavs/:id", authenticateToken, SalonController.getFav)
+Router.post("/myfavs/:id", authenticateToken, SalonController.getFav)
 
 export { Router as SalonRoutes };

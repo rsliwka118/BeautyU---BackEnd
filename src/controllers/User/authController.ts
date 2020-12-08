@@ -1,20 +1,29 @@
-import { getRepository } from "typeorm"
+import { getManager, getRepository } from "typeorm"
 import { User } from "../../entity/User/User"
 import { createHmac } from "crypto"
 import * as jwt from "jsonwebtoken"
 import { Token } from "../../entity/User/Token"
 import { UserRoutes } from "../../routes/User/user.routes"
+import { SalonFav } from "../../entity/Salon/SalonFav"
 
 //Details
 export async function details(req, res) {
   let Repository = getRepository(User)
-
+  let RepositoryFav = getRepository(SalonFav)
+  
   let user = await Repository.findOne({ where: { id: req.body.data.userID } })
-
+  
   try {
     if (user != null) {
+
+      const favorites = await getManager()
+      .createQueryBuilder(SalonFav, 'salonFav')
+      .select('salonFav.salon')
+      .where('salonFav.user = :id', {id: req.user.id})
+      .getMany()
+
       console.log("Successfully sended details!")
-      return res.status(200).send({ firstName: user.firstName, lastName: user.lastName })
+      return res.status(200).send({user: { firstName: user.firstName, lastName: user.lastName }, favorites})
     } else {
       return res.status(404).send("User not found")
     }
