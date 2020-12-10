@@ -146,15 +146,16 @@ export async function getPreviews(req, res) {
 
     //const salons = await RepositorySalon.find()
     const user = await RepositoryUsers.findOne(req.user.id)
-
+    
     if (!checkAccountType(user)) {
 
       const salons = await getManager()
       .createQueryBuilder(Salon, 'salon')
       .select(['salon.id','salon.name'])
-      .where('salon.type = :type',{ type: req.params.type})
       .leftJoinAndMapOne('salon.location', SalonLocation, 'location', 'salon.locationID = location.id')
       .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
+      .where('salon.type = :type',{ type: req.params.type})
+      .andWhere('location.city = :city', {city: user.city})
       .getMany()
 
       const favorites = await getManager()

@@ -31,6 +31,12 @@ export class User {
   @Column()
   password: string
   
+  @Column('bit', { default: 0 })
+  isNew: number;
+
+  @Column()
+  city: string
+
   @OneToMany( () => SalonRate, rate => rate.user )
   rates: SalonRate[]
   

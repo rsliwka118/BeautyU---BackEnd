@@ -5,12 +5,13 @@ import * as jwt from "jsonwebtoken"
 import { Token } from "../../entity/User/Token"
 import { UserRoutes } from "../../routes/User/user.routes"
 import { SalonFav } from "../../entity/Salon/SalonFav"
+import { Salon } from "../../entity/Salon/Salon"
+import { SalonLocation } from "../../entity/Salon/SalonLocation"
 
 //Details
 export async function details(req, res) {
+
   let Repository = getRepository(User)
-  let RepositoryFav = getRepository(SalonFav)
-  
   let user = await Repository.findOne({ where: { id: req.body.data.userID } })
   
   try {
@@ -22,8 +23,15 @@ export async function details(req, res) {
       .where('salonFav.user = :id', {id: req.user.id})
       .getMany()
 
+      const cities = await getManager()
+      .createQueryBuilder(SalonLocation,'location')
+      .select("location.city AS city")
+      .addSelect("COUNT(*) AS count")
+      .groupBy("location.city")
+      .getRawMany();
+
       console.log("Successfully sended details!")
-      return res.status(200).send({user: { firstName: user.firstName, lastName: user.lastName }, favorites})
+      return res.status(200).send({user: { firstName: user.firstName, lastName: user.lastName, isNew: user.isNew }, favorites, cities})
     } else {
       return res.status(404).send("User not found")
     }
@@ -31,6 +39,31 @@ export async function details(req, res) {
     console.error(Error)
     return res.status(500).send("server err")
   }
+}
+
+//Settings
+export async function settings(req,res){
+
+  let Repository = getRepository(User)
+  let user = await Repository.findOne({ where: { id: req.params.id } })
+
+  try {
+    if (user != null) {
+      let accountType = req.body.data.accountType
+      let city = req.body.data.city
+
+      await Repository.update(user, {isNew: 1, accountType: accountType, city: city})
+
+      console.log("Successfully added settings!")
+      return res.status(200).send({message: "Zapisano ustawienia!"})
+    } else {
+      return res.status(404).send("User not found")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+
 }
 
 //Register

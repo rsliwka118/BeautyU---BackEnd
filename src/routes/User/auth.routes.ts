@@ -11,6 +11,9 @@ var Router = express.Router();
 //Get details
 Router.post("/details", authenticateToken, AuthController.details)
 
+//Set account
+Router.post("/settings/:id", authenticateToken, AuthController.settings)
+
 //Register
 Router.post("/register",
   [
