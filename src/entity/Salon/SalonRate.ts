@@ -10,8 +10,9 @@ export class SalonRate {
   @Column()
   rate: string
 
-  @ManyToOne( user => User )
-  @JoinColumn()
+  @ManyToOne( user => User, {
+    onDelete: 'CASCADE'
+  } )
   user: User
 
   @ManyToOne( () => Salon, salon => salon.rates )

@@ -37,7 +37,7 @@ export class User {
   @Column()
   city: string
 
-  @OneToMany( () => SalonRate, rate => rate.user )
+  @OneToMany( () => SalonRate, rate => rate.user, { cascade: true })
   rates: SalonRate[]
   
   @BeforeInsert()

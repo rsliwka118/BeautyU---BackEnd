@@ -31,7 +31,7 @@ export async function details(req, res) {
       .getRawMany();
 
       console.log("Successfully sended details!")
-      return res.status(200).send({user: { firstName: user.firstName, lastName: user.lastName, isNew: user.isNew }, favorites, cities})
+      return res.status(200).send({user: { firstName: user.firstName, lastName: user.lastName, city: user.city, isNew: user.isNew }, favorites, cities})
     } else {
       return res.status(404).send("User not found")
     }
@@ -56,6 +56,35 @@ export async function settings(req,res){
 
       console.log("Successfully added settings!")
       return res.status(200).send({message: "Zapisano ustawienia!"})
+    } else {
+      return res.status(404).send("User not found")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+
+}
+
+//Update city
+export async function updateCity(req,res){
+
+  let Repository = getRepository(User)
+  let user = await Repository.findOne({ where: { id: req.params.id } })
+
+  try {
+    if (user != null) {
+      let city = req.body.data.city
+
+      await getManager()
+      .createQueryBuilder(User, 'user')
+      .update<User>(User, {city: city})
+      .where("id = :id", { id: req.params.id })
+      .updateEntity(true)
+      .execute();
+
+      console.log("Successfully updated user!")
+      return res.status(200).send( {message: "Zmieniono lokalizacje!"})
     } else {
       return res.status(404).send("User not found")
     }
@@ -155,6 +184,20 @@ export async function logout(req, res) {
 
   await RepositoryRefreshToken.delete({ refreshToken: refreshToken });
   return res.status(204).send("Logged out")
+}
+
+//Delete account
+export async function deleteAccount(req, res) {
+
+  let RepositoryUser = getRepository(User)
+  let user = await RepositoryUser.findOne({ where: {id: req.params.id}})
+
+  if (user == null) return res.sendStatus(404)
+
+  await RepositoryUser.remove(user)
+
+  return res.status(200).send({message: "Konto zostało usunięte"})
+
 }
 
 //Get new access token

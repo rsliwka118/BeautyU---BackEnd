@@ -14,6 +14,9 @@ Router.post("/details", authenticateToken, AuthController.details)
 //Set account
 Router.post("/settings/:id", authenticateToken, AuthController.settings)
 
+//Update account
+Router.post("/update-settings/:id", authenticateToken, AuthController.updateCity)
+
 //Register
 Router.post("/register",
   [
@@ -32,6 +35,9 @@ Router.post("/token", AuthController.refreshToken);
 
 //Logout
 Router.delete("/logout", AuthController.logout);
+
+//Delete account
+Router.delete("/account/:id", AuthController.deleteAccount)
 
 //CheckToken
 Router.get("/checktoken", authenticateToken, AuthController.checkToken)
