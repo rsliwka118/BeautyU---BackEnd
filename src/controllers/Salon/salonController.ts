@@ -1,5 +1,5 @@
 import { createHmac } from "crypto";
-import { getRepository, getManager } from "typeorm"
+import { getRepository, getManager, Brackets } from "typeorm"
 import { Salon } from "../../entity/Salon/Salon"
 import { SalonFav } from "../../entity/Salon/SalonFav";
 import { SalonLocation } from "../../entity/Salon/SalonLocation"
@@ -528,6 +528,33 @@ export async function getFav(req, res) {
   } else {
       return res.status(400).send("access denied ( route for client account )")
     }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+
+}
+
+//Search
+export async function search(req, res) {
+
+  try {
+    let RepositoryUsers = getRepository(User)
+    const user = await RepositoryUsers.findOne(req.params.id)
+    
+    let phrase = req.body.data.phrase
+    
+    const result = await getManager()
+      .createQueryBuilder(Salon, 'salon')
+      .select(['salon.id','salon.name'])
+      .leftJoinAndMapOne('salon.location', SalonLocation, 'location', 'salon.locationID = location.id')
+      .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
+      .where('location.city = :city', {city: user.city})
+      .andWhere("name like :phrase", { phrase:`%${phrase}%`})
+      .getMany()
+
+    return res.status(200).send(result)
+ 
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")

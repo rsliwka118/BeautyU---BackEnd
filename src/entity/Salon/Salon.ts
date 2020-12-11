@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, OneToOne, Index } from "typeorm"
 import { SalonService } from "./SalonService"
 import { SalonReview } from "./SalonReview"
 import { SalonLocation } from "./SalonLocation"
@@ -23,6 +23,7 @@ export class Salon {
   @Column()
   ownerID: string
 
+  @Index({ fulltext: true })
   @Column()
   name: string
 
@@ -31,7 +32,6 @@ export class Salon {
 
   @Column()
   describe: string
-
 
   @Column()
   hours: string //open&close#opec&close...

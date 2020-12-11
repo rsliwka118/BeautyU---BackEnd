@@ -82,4 +82,7 @@ Router.delete("/fav/:user/:salon", authenticateToken, SalonController.deleteFav)
 //Get fav salons
 Router.post("/myfavs/:id", authenticateToken, SalonController.getFav)
 
+//Search
+Router.post("/search/:id", authenticateToken, SalonController.search)
+
 export { Router as SalonRoutes };
