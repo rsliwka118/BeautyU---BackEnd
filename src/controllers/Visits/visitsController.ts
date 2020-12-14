@@ -33,6 +33,7 @@ export async function addVisit(req, res) {
         NewVisit.salonID = salon.id,
         NewVisit.serviceID = req.body.data.serviceID,
         NewVisit.date = req.body.data.date,
+        NewVisit.hour = req.body.data.hour,
         NewVisit.info = req.body.data.info
   
         await RepositoryVisits.save(NewVisit)
@@ -55,21 +56,38 @@ export async function getAvailableDate(req, res) {
   let RepositoryVisit = getRepository(Visit)
   let RepositorySalon = getRepository(Salon)
   
-  //potem rozszarzyć dla sprawdzenia wielu wizyt
-  let visit = await RepositoryVisit.findOne({ where: { salonID: req.params.id } })
+//   let visit = await RepositoryVisit.findOne({ where: { salonID: req.params.id } })
   let salon = await RepositorySalon.findOne({ where: { id: req.params.id } })
-  
+  let date = req.body.data.date
+
   try {
 
     const hours = convertHours(salon.hours)
-    salonHours(visit.date, 30, hours)
-      
-    return res.sendStatus(200) 
+    const availableHours = salonHours(date, 30, hours)
+
+    const visitsHours = await getManager()
+    .createQueryBuilder(Visit, 'visit')
+    .select('visit.hour')
+    .where("date like :date", { date: `%${date}%`})
+    .getMany()
+   
+    for( let i = 0; i < visitsHours.length; i++ ){
+        removeItem( availableHours, visitsHours[i].hour )
+    }
+    
+    return res.status(200).send( { availableHours: availableHours } ) 
 
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
   }
+}
+
+function removeItem(array, item){
+    const index = array.indexOf(item);
+    if (index > -1) {
+        array.splice(index, 1);
+    }
 }
 
 function salonHours(date, serviceTime, salonHours) {
@@ -88,7 +106,7 @@ function salonHours(date, serviceTime, salonHours) {
          i++
     } 
 
-    console.log(availableHours)
+    return availableHours
 }
 
 function addHours(hr, el) {
@@ -97,7 +115,7 @@ function addHours(hr, el) {
     let hour = parseInt(hours[0], 10);
     let minute = parseInt(hours[1], 10);
 
-    if( minute + el > 60) {
+    if( minute + el >= 60) {
         hour = ( ++hour > 23) ? 0 : hour++
         minute -= el
     } else {

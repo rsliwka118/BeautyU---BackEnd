@@ -20,8 +20,11 @@ export class Visit {
   @Column()
   serviceID: string
 
-  @Column({ type: "timestamp"} )
+  @Column()
   date: string
+
+  @Column()
+  hour: string
 
   @Column()
   info: string
