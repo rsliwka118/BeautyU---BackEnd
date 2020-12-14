@@ -52,32 +52,86 @@ export async function addVisit(req, res) {
 //Get available date
 export async function getAvailableDate(req, res) {
 
-  let Repository = getRepository(User)
-  let user = await Repository.findOne({ where: { id: req.body.data.userID } })
+  let RepositoryVisit = getRepository(Visit)
+  let RepositorySalon = getRepository(Salon)
+  
+  //potem rozszarzyć dla sprawdzenia wielu wizyt
+  let visit = await RepositoryVisit.findOne({ where: { salonID: req.params.id } })
+  let salon = await RepositorySalon.findOne({ where: { id: req.params.id } })
   
   try {
-    if (user != null) {
 
-      const favorites = await getManager()
-      .createQueryBuilder(SalonFav, 'salonFav')
-      .select('salonFav.salon')
-      .where('salonFav.user = :id', {id: req.user.id})
-      .getMany()
+    const hours = convertHours(salon.hours)
+    salonHours(visit.date, 30, hours)
+      
+    return res.sendStatus(200) 
 
-      const cities = await getManager()
-      .createQueryBuilder(SalonLocation,'location')
-      .select("location.city AS city")
-      .addSelect("COUNT(*) AS count")
-      .groupBy("location.city")
-      .getRawMany();
-
-      console.log("Successfully sended details!")
-      return res.status(200).send({user: { firstName: user.firstName, lastName: user.lastName, city: user.city, isNew: user.isNew }, favorites, cities})
-    } else {
-      return res.status(404).send("User not found")
-    }
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
   }
+}
+
+function salonHours(date, serviceTime, salonHours) {
+
+    const dayOfWeek = new Date(date).getDay()
+    const start = salonHours[dayOfWeek-1][0]
+    const end = salonHours[dayOfWeek-1][1]
+
+    let availableHours = []
+    let i = 0
+
+    availableHours.push(start)
+
+    while ( compareHours( addHours(availableHours[i], serviceTime), end ) ) {
+         availableHours.push( addHours(availableHours[i], serviceTime) )
+         i++
+    } 
+
+    console.log(availableHours)
+}
+
+function addHours(hr, el) {
+
+    let hours = hr.split(':')
+    let hour = parseInt(hours[0], 10);
+    let minute = parseInt(hours[1], 10);
+
+    if( minute + el > 60) {
+        hour = ( ++hour > 23) ? 0 : hour++
+        minute -= el
+    } else {
+        minute += el
+    }
+    
+    return hour + ":" + ( minute < 10 ? "0" : "") + minute
+
+}
+
+function compareHours(hr1, hr2) {
+
+    let hours1 = hr1.split(':')
+    let hour1 = parseInt(hours1[0], 10);
+    let minute1 = parseInt(hours1[1], 10);
+
+    let hours2 = hr2.split(':')
+    let hour2 = parseInt(hours2[0], 10);
+    let minute2 = parseInt(hours2[1], 10);
+    
+    if( hour1 == hour2 ){
+        if( minute1 < minute2) return true
+    }
+    else if( hour1 < hour2 ) return true
+    else return false
+
+}
+
+function convertHours(hours) {
+    let hrs = hours.split('#')
+
+    for(let i=0; i < hrs.length; i++){
+        hrs[i]=hrs[i].split('&')
+    }
+
+    return hrs
 }

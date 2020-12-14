@@ -5,7 +5,7 @@ import authenticateToken from "../../middlewares/authenticateToken.middlewares";
 
 var Router = express.Router();
 //Get available date
-Router.post("/visits/date", authenticateToken, VisitsController.getAvailableDate)
+Router.post("/visits/date/:id", VisitsController.getAvailableDate)
 
 //Add new visit
 Router.post("/visits/:id", authenticateToken, VisitsController.addVisit)
