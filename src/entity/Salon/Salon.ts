@@ -34,7 +34,7 @@ export class Salon {
   describe: string
 
   @Column()
-  hours: string //8:00&20:00#8:01&20:01#8:02&20:02#8:03&20:03#8:04&20:04#8:05&20:05#-&-
+  hours: string //(MO start)8:00&20:00#8:01&20:01#8:02&20:02#8:03&20:03#8:04&20:04#8:05&20:05#-&-
 
   @OneToMany( () => SalonService, service => service.salon )
   services: SalonService[]

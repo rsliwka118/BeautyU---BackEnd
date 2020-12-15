@@ -56,7 +56,6 @@ export async function getAvailableDate(req, res) {
   let RepositoryVisit = getRepository(Visit)
   let RepositorySalon = getRepository(Salon)
   
-//   let visit = await RepositoryVisit.findOne({ where: { salonID: req.params.id } })
   let salon = await RepositorySalon.findOne({ where: { id: req.params.id } })
   let date = req.body.data.date
 
@@ -65,16 +64,18 @@ export async function getAvailableDate(req, res) {
     const hours = convertHours(salon.hours)
     const availableHours = salonHours(date, 30, hours)
 
-    const visitsHours = await getManager()
-    .createQueryBuilder(Visit, 'visit')
-    .select('visit.hour')
-    .where("date like :date", { date: `%${date}%`})
-    .getMany()
-   
-    for( let i = 0; i < visitsHours.length; i++ ){
-        removeItem( availableHours, visitsHours[i].hour )
-    }
+    if(availableHours.length != 0){
+      const visitsHours = await getManager()
+      .createQueryBuilder(Visit, 'visit')
+      .select('visit.hour')
+      .where("date like :date", { date: `%${date}%`})
+      .getMany()
     
+      for( let i = 0; i < visitsHours.length; i++ ){
+          removeItem( availableHours, visitsHours[i].hour )
+      }
+    }
+
     return res.status(200).send( { availableHours: availableHours } ) 
 
   } catch (Error) {
@@ -91,22 +92,29 @@ function removeItem(array, item){
 }
 
 function salonHours(date, serviceTime, salonHours) {
+    
+  let availableHours = []
+ 
+    let dayOfWeek = new Date(date).getDay() || 7 // start day convert to monday
 
-    const dayOfWeek = new Date(date).getDay()
-    const start = salonHours[dayOfWeek-1][0]
-    const end = salonHours[dayOfWeek-1][1]
 
-    let availableHours = []
-    let i = 0
+    const start = salonHours[dayOfWeek - 1][0]
+    const end = salonHours[dayOfWeek - 1][1]
 
+    console.log(date +" "+dayOfWeek+" ")
+
+    if( salonHours[dayOfWeek - 1][0] === "-") return []
     availableHours.push(start)
 
+    let i = 0
+
     while ( compareHours( addHours(availableHours[i], serviceTime), end ) ) {
-         availableHours.push( addHours(availableHours[i], serviceTime) )
-         i++
+        availableHours.push( addHours(availableHours[i], serviceTime) )
+        i++
     } 
 
     return availableHours
+    
 }
 
 function addHours(hr, el) {
