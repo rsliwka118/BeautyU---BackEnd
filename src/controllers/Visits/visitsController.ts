@@ -39,8 +39,8 @@ export async function addVisit(req, res) {
         await RepositoryVisits.save(NewVisit)
   
         console.dir(NewVisit)
-  
-        return res.status(200).send("Successfuly added new visit for " + salon.name + " by " + user.firstName + "!")
+ 
+        return res.status(200).send({message:"Zarezerwowano wizytę!"})
     } else {
         return res.status(400).send("access denied ( route for client account )")
       }
@@ -100,8 +100,6 @@ function salonHours(date, serviceTime, salonHours) {
 
     const start = salonHours[dayOfWeek - 1][0]
     const end = salonHours[dayOfWeek - 1][1]
-
-    console.log(date +" "+dayOfWeek+" ")
 
     if( salonHours[dayOfWeek - 1][0] === "-") return []
     availableHours.push(start)
