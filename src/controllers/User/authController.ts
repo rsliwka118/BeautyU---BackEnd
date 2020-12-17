@@ -31,7 +31,7 @@ export async function details(req, res) {
       .getRawMany();
 
       console.log("Successfully sended details!")
-      return res.status(200).send({user: { firstName: user.firstName, lastName: user.lastName, city: user.city, isNew: user.isNew }, favorites, cities})
+      return res.status(200).send({user: { firstName: user.firstName, lastName: user.lastName, city: user.city, isNew: user.isNew, accountType: user.accountType }, favorites, cities})
     } else {
       return res.status(404).send("User not found")
     }

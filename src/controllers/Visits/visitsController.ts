@@ -4,10 +4,10 @@ import { Salon } from "../../entity/Salon/Salon"
 import { Visit } from "../../entity/Visits/Visits"
 import { SalonService } from "../../entity/Salon/SalonService"
 
-function checkAccountType(user) {
-    if(user.accountType === "Client") return 0
-    if(user.accountType === "Salon") return 1
-}
+// function checkAccountType(user) {
+//     if(user.accountType === "Client") return 0
+//     if(user.accountType === "Salon") return 1
+// }
 
 //Add new visit
 export async function addVisit(req, res) {
@@ -20,7 +20,6 @@ export async function addVisit(req, res) {
       const salon = await RepositorySalon.findOne(req.params.id)
 
       if (salon == null) return res.status(404).send("No salon found")
-      if (!checkAccountType(user)) {
   
         //Add Visit
         let NewVisit = new Visit()
@@ -36,9 +35,7 @@ export async function addVisit(req, res) {
         console.dir(NewVisit)
  
         return res.status(200).send({message:"Zarezerwowano wizytę!"})
-    } else {
-        return res.status(400).send("access denied ( route for client account )")
-      }
+  
     } catch (Error) {
       console.error(Error)
       return res.status(500).send("server err")
@@ -53,8 +50,6 @@ export async function getVisit(req, res) {
     let RepositoryVisits = getRepository(Visit)
   
     const user = await RepositoryUsers.findOne(req.user.id)
-
-    if (!checkAccountType(user)) {
 
       //Get visits
       const visits = await getRepository(Visit)
@@ -79,9 +74,7 @@ export async function getVisit(req, res) {
       .getMany()
 
       return res.status(200).send({visits: visits, history: history})
-  } else {
-      return res.status(400).send("access denied ( route for client account )")
-    }
+ 
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")

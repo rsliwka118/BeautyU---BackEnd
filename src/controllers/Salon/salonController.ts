@@ -7,11 +7,6 @@ import { SalonRate } from "../../entity/Salon/SalonRate"
 import { SalonReview } from "../../entity/Salon/SalonReview"
 import { SalonService } from "../../entity/Salon/SalonService"
 import { User } from "../../entity/User/User"
-//Check type of user account
-function checkAccountType(user) {
-    if(user.accountType === "Client") return 0
-    if(user.accountType === "Salon") return 1
-}
 
 //Check if parameter is equal null ( for update functions )
 function checkEmpty(param, existingItem){
@@ -28,7 +23,6 @@ export async function addSalon(req, res) {
     const user = await RepositoryUsers.findOne(req.user.id)
 
     try {
-      if (checkAccountType(user)) {
 
         //Add Location
         let NewLocation = new SalonLocation()
@@ -52,9 +46,7 @@ export async function addSalon(req, res) {
         console.dir(NewSalon)
 
         return res.status(200).send("Successfuly added new salon for " + user.firstName + "!")
-    } else {
-        return res.status(400).send("access denied ( route for salon account )")
-      }
+
     } catch (Error) {
       console.error(Error)
       return res.status(500).send("server err")
@@ -74,8 +66,7 @@ export async function updateSalon(req, res) {
   try {
     if (salon == null) return res.status(404).send("No salon found")
     if (salon.ownerID != user.id) return res.status(403).send("You are not the owner of this salon")
-    if (checkAccountType(user)) {
-
+    
       //Update Location
       await RepositorySalonLocation.update(location.id,
         {
@@ -96,9 +87,6 @@ export async function updateSalon(req, res) {
         })
 
       return res.status(200).send("Successfuly updated salon for " + user.firstName + "!")
-  } else {
-      return res.status(400).send("access denied ( route for salon account )")
-    }
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -147,8 +135,6 @@ export async function getPreviews(req, res) {
     //const salons = await RepositorySalon.find()
     const user = await RepositoryUsers.findOne(req.user.id)
     
-    if (!checkAccountType(user)) {
-
       const salons = await getManager()
       .createQueryBuilder(Salon, 'salon')
       .select(['salon.id','salon.name'])
@@ -165,9 +151,7 @@ export async function getPreviews(req, res) {
       .getMany()
       
       return res.status(200).json({salons ,favorites})
-    } else {
-     return res.status(400).send("access denied ( route for client account )")
-    }
+
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -183,8 +167,6 @@ export async function getSalons(req, res) {
     //const salons = await RepositorySalon.find()
     const user = await RepositoryUsers.findOne(req.user.id)
 
-    if (!checkAccountType(user)) {
-
       const salons = await RepositorySalon
       .createQueryBuilder('salon')
       .leftJoinAndMapOne("salon.location", SalonLocation, 'location', 'salon.locationID = location.id')
@@ -193,9 +175,7 @@ export async function getSalons(req, res) {
       .getMany()
 
       return res.status(200).json({salons: salons})
-    } else {
-     return res.status(400).send("access denied ( route for client account )")
-    }
+
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -212,14 +192,6 @@ export async function getSalonByID(req, res) {
     //const salon = await RepositorySalon.findOne(req.params.id)
     const user = await RepositoryUsers.findOne(req.user.id)
 
-    if (!checkAccountType(user)) {
-
-     // if (!salon) {
-     //   res.status(404)
-     //   res.end()
-     //   return
-     // }
-
       const salon = await RepositorySalon
       .createQueryBuilder('salon')
       .leftJoinAndMapOne("salon.location", SalonLocation, 'location', 'salon.locationID = location.id')
@@ -235,9 +207,6 @@ export async function getSalonByID(req, res) {
       .getMany()
     
       return res.status(200).send({salon, services})
-    } else {
-     return res.status(400).send("access denied ( route for client account )")
-    }
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -255,7 +224,6 @@ export async function addSalonService(req, res) {
   try {
     if (salon == null) return res.status(404).send("No salon found")
     if (salon.ownerID != user.id) return res.status(403).send("You are not the owner of this salon")
-    if (checkAccountType(user)) {
 
       //Add Service
       let NewService = new SalonService()
@@ -269,9 +237,6 @@ export async function addSalonService(req, res) {
       console.dir(NewService)
 
       return res.status(200).send("Successfuly added new service for " + salon.name + "!")
-  } else {
-      return res.status(400).send("access denied ( route for salon account )")
-    }
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -287,7 +252,6 @@ export async function updateSalonService(req, res) {
   const salonService = await RepositorySalonService.findOne(req.params.id)
   try {
     if (salonService == null) return res.status(404).send("No salon found")
-    if (checkAccountType(user)) {
 
       //Update Service
       await RepositorySalonService.update(salonService.id,
@@ -299,9 +263,7 @@ export async function updateSalonService(req, res) {
         })
 
       return res.status(200).send("Successfuly update the service")
-  } else {
-      return res.status(400).send("access denied ( route for salon account )")
-    }
+
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -320,15 +282,11 @@ export async function deleteSalonService(req, res) {
     
     //Check if salon service exist
     if (salonService == null) return res.status(404).send("No salon found")
-    if (checkAccountType(user)) {
-
+   
       await RepositorySalonService.delete(salonService);
 
       res.send("Successfully deleted salon service " + salonService.offerTitle +  "( id: "+ salonService.id + ")")
       return res.status(204)
-    } else {
-      return res.status(401).send("access denied ( route for salon account )")
-    }
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -346,8 +304,7 @@ export async function addReview(req, res) {
     const salon = await RepositorySalon.findOne(req.params.id)
 
     if (salon == null) return res.status(404).send("No salon found")
-    if (!checkAccountType(user)) {
-
+  
       //Add Review
       let NewReview = new SalonReview()
       NewReview.userID = user.id,
@@ -359,9 +316,6 @@ export async function addReview(req, res) {
       console.dir(NewReview)
 
       return res.status(200).send("Successfuly added new review for " + salon.name + " by " + user.firstName + "!")
-  } else {
-      return res.status(400).send("access denied ( route for client account )")
-    }
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -408,7 +362,6 @@ export async function addRate(req, res) {
     const rateExists = await RepositorySalonRate.findOne({user: user, salon: salon})
 
     if (salon == null) return res.status(404).send("No salon found")
-    if (!checkAccountType(user)) {
       //Check if rate for salon by user is already exist
       if(rateExists == null){
         //Add Rate
@@ -429,9 +382,6 @@ export async function addRate(req, res) {
         await RepositorySalonRate.update(rateExists.id, { rate: req.body.data.rate })
         return res.status(200).send(message)
       }
-  } else {
-      return res.status(400).send("access denied ( route for client account )")
-    }
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -449,7 +399,7 @@ export async function addFav(req, res) {
     const salon = await RepositorySalon.findOne(req.body.data.id)
     console.log(req.body.data.id)
     if (salon == null) return res.status(404).send("No salon found")
-    if (!checkAccountType(user)) {
+   
       //Add Fav
       let message = {message: "Dodano do ulubionych!"}
       let NewFav = new SalonFav()
@@ -462,9 +412,6 @@ export async function addFav(req, res) {
 
       return res.status(200).send(message)
      
-  } else {
-      return res.status(400).send("access denied ( route for client account )")
-    }
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -482,17 +429,7 @@ export async function deleteFav(req, res) {
     const salon = await RepositorySalon.findOne(req.params.salon)
 
     if (salon == null) return res.status(404).send("No salon found")
-    if (!checkAccountType(user)) {
-      //Add Fav
-      let message = {message: "Usunięto z ulubionych."}
-      const fav = await RepositorySalonFav.findOne({ where: { user: user.id, salon: salon.id } })
-
-      await RepositorySalonFav.delete(fav);
-      return res.status(200).send(message)
-     
-  } else {
-      return res.status(400).send("access denied ( route for client account )")
-    }
+    
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -512,22 +449,6 @@ export async function getFav(req, res) {
     if ( user == null ) return res.status(404).send("No user found")
     if ( favList.length === 0) return res.status(404).send("No favs found")
     
-    if (!checkAccountType(user)) {
-
-      //Fav list
-      const favorites = await getManager()
-      .createQueryBuilder(Salon, 'salon')
-      .select(['salon.id','salon.name'])
-      .where('salon.id IN (:favs)',{ favs: favList })
-      .leftJoinAndMapOne('salon.location', SalonLocation, 'location', 'salon.locationID = location.id')
-      .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
-      .getMany()
-
-      return res.status(200).send(favorites)
-     
-  } else {
-      return res.status(400).send("access denied ( route for client account )")
-    }
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
