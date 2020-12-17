@@ -1,13 +1,8 @@
 import { getManager, getRepository } from "typeorm"
 import { User } from "../../entity/User/User"
-import { createHmac } from "crypto"
-import * as jwt from "jsonwebtoken"
-import { Token } from "../../entity/User/Token"
-import { UserRoutes } from "../../routes/User/user.routes"
-import { SalonFav } from "../../entity/Salon/SalonFav"
 import { Salon } from "../../entity/Salon/Salon"
-import { SalonLocation } from "../../entity/Salon/SalonLocation"
 import { Visit } from "../../entity/Visits/Visits"
+import { SalonService } from "../../entity/Salon/SalonService"
 
 function checkAccountType(user) {
     if(user.accountType === "Client") return 0
@@ -23,11 +18,11 @@ export async function addVisit(req, res) {
     
       const user = await RepositoryUsers.findOne(req.user.id)
       const salon = await RepositorySalon.findOne(req.params.id)
-  
+
       if (salon == null) return res.status(404).send("No salon found")
       if (!checkAccountType(user)) {
   
-        //Add Review
+        //Add Visit
         let NewVisit = new Visit()
         NewVisit.userID = user.id,
         NewVisit.salonID = salon.id,
@@ -50,6 +45,79 @@ export async function addVisit(req, res) {
     }
   }
 
+//Get user visits
+export async function getVisit(req, res) {
+  try {
+    let RepositoryUsers = getRepository(User)
+    let RepositorySalon = getRepository(Salon)
+    let RepositoryVisits = getRepository(Visit)
+  
+    const user = await RepositoryUsers.findOne(req.user.id)
+
+    if (!checkAccountType(user)) {
+
+      //Get visits
+      const visits = await getRepository(Visit)
+      .createQueryBuilder('visit')
+      .select(['visit.id','visit.date','visit.hour','visit.status'])
+      .leftJoinAndMapOne('visit.salonID', Salon, 'salon', 'visit.salonID = salon.id')
+      .leftJoinAndMapOne('visit.serviceID', SalonService, 'service', 'visit.serviceID = service.id')
+      .where("userID = :userID", { userID: user.id})
+      .andWhere("status = 'Scheduled'")
+      .orderBy("visit.date")
+      .getMany()
+
+      const history = await getManager()
+      .createQueryBuilder(Visit, 'visit')
+      .select(['visit.id','visit.date','visit.hour','visit.status'])
+      .addSelect('visit.hour')
+      .leftJoinAndMapOne('visit.salonID', Salon, 'salon', 'visit.salonID = salon.id')
+      .leftJoinAndMapOne('visit.serviceID', SalonService, 'service', 'visit.serviceID = service.id')
+      .where("userID = :userID", { userID: user.id})
+      .andWhere("status != 'Scheduled'")
+      .orderBy("visit.date")
+      .getMany()
+
+      return res.status(200).send({visits: visits, history: history})
+  } else {
+      return res.status(400).send("access denied ( route for client account )")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
+//Update status
+export async function updateStatus(req,res){
+
+  let RepositoryVisits = getRepository(Visit)
+  let visit = await RepositoryVisits.findOne({ where: { id: req.params.id } })
+  
+  try {
+    if (visit != null) {
+      let status = req.body.data.status
+      let message = status === "Canceled" ? "Anulowano wizytę" : "Zmieniono status wizyty"
+
+      await getManager()
+      .createQueryBuilder(Visit, 'visit')
+      .update<Visit>(Visit, {status: status})
+      .where("id = :id", { id: req.params.id })
+      .updateEntity(true)
+      .execute();
+
+      console.log("Successfully updated visit status!")
+      return res.status(200).send( {message: message})
+    } else {
+      return res.status(404).send("Visit not found")
+    }
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+
+}
+
 //Get available date
 export async function getAvailableDate(req, res) {
 
@@ -59,10 +127,15 @@ export async function getAvailableDate(req, res) {
   let salon = await RepositorySalon.findOne({ where: { id: req.params.id } })
   let date = req.body.data.date
 
+  const _date = new Date(req.body.data.date)
+
   try {
 
     const hours = convertHours(salon.hours)
     const availableHours = salonHours(date, 30, hours)
+    const today = new Date()
+    const now = today.getHours() + ":" + today.getMinutes()
+    let arr = []
 
     if(availableHours.length != 0){
       const visitsHours = await getManager()
@@ -70,10 +143,20 @@ export async function getAvailableDate(req, res) {
       .select('visit.hour')
       .where("date like :date", { date: `%${date}%`})
       .getMany()
-    
+      
       for( let i = 0; i < visitsHours.length; i++ ){
           removeItem( availableHours, visitsHours[i].hour )
       }
+
+      if( formatFullDate( _date ) === formatFullDate(today)){
+        for( let i = 0; i < availableHours.length; i++ ){
+          if( compareHours( availableHours[i], now ) ) arr.push(availableHours[i])//removeItem( availableHours, availableHours[i] )
+        }
+        for( let i = 0; i < arr.length; i++ ){
+          removeItem( availableHours, arr[i] )
+        }
+      }
+
     }
 
     return res.status(200).send( { availableHours: availableHours } ) 
@@ -95,7 +178,7 @@ function salonHours(date, serviceTime, salonHours) {
     
   let availableHours = []
  
-    let dayOfWeek = new Date(date).getDay() || 7 // start day convert to monday
+    let dayOfWeek = new Date(date).getDay() || 7 //start day convert to monday
 
 
     const start = salonHours[dayOfWeek - 1][0]
@@ -144,6 +227,7 @@ function compareHours(hr1, hr2) {
     
     if( hour1 == hour2 ){
         if( minute1 < minute2) return true
+        else return false
     }
     else if( hour1 < hour2 ) return true
     else return false
@@ -158,4 +242,12 @@ function convertHours(hours) {
     }
 
     return hrs
+}
+
+function formatFullDate(data){
+  let dd = String(data.getDate()).padStart(2, '0')
+  let mm = String(data.getMonth() + 1).padStart(2, '0')
+  let yyyy = data.getFullYear()
+
+  return yyyy + '-' + mm + '-' + dd
 }

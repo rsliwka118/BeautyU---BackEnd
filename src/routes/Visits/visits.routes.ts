@@ -10,4 +10,13 @@ Router.post("/visits/date/:id", authenticateToken, VisitsController.getAvailable
 //Add new visit
 Router.post("/visits/:id", authenticateToken, VisitsController.addVisit)
 
+//Get user visits
+Router.get("/visits", authenticateToken, VisitsController.getVisit)
+
+//Get user visits
+Router.get("/visits", authenticateToken, VisitsController.getVisit)
+
+//Update visit status
+Router.post("/visits/status/:id", authenticateToken, VisitsController.updateStatus)
+
 export { Router as VisitsRoutes };
