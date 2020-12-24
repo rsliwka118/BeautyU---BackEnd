@@ -10,15 +10,15 @@ var Router = express.Router();
 //Add new salon
 Router.post("/salon",
   [
-    check("name", "Salon name must contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
-    check("type", "Incorrect salon type. Must be Hairdresser, Barber, Massager, Beautician, Nails, Depilation")
+    check("data.name", "Salon name must contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
+    check("data.type", "Incorrect salon type. Must be Hairdresser, Barber, Massager, Beautician, Nails, Depilation")
     .isIn(['Hairdresser', 'Barber', 'Massager', 'Beautician', 'Nails', 'Depilation']),
-    check("describe", "Salon describe can be up to 250 characters long").trim().isLength({ max: 250 }),
-    check("hours", "Hours can not be empty").not().isEmpty(),
-    check("city", "City can not be empty").not().isEmpty(),
-    check("code", "Code can not be empty").not().isEmpty(),
-    check("street", "Street can not be empty").not().isEmpty(),
-    check("houseNumber", "Number can not be empty").not().isEmpty(),
+    check("data.describe", "Salon describe can be up to 250 characters long").trim().isLength({ max: 250 }),
+    check("data.hours", "Hours can not be empty").not().isEmpty(),
+    check("data.city", "City can not be empty").not().isEmpty(),
+    check("data.code", "Code can not be empty").not().isEmpty(),
+    check("data.street", "Street can not be empty").not().isEmpty(),
+    check("data.houseNumber", "Number can not be empty").not().isEmpty(),
 
   ], 
   CheckInputMiddleware, authenticateToken, SalonController.addSalon)
@@ -26,10 +26,10 @@ Router.post("/salon",
 //Update salon
 Router.put("/salon/:id",
   [
-    check("name", "Salon name can contain maximum 50 characters").trim().isLength({ max: 50 }),
-    check("type", "Incorrect salon type. Must be Hairdresser, Barber, Massager, Beautician, Nails, Depilation")
+    check("data.name", "Salon name can contain maximum 50 characters").trim().isLength({ max: 50 }),
+    check("data.type", "Incorrect salon type. Must be Hairdresser, Barber, Massager, Beautician, Nails, Depilation")
     .isIn(['Hairdresser', 'Barber', 'Massager', 'Beautician', 'Nails', 'Depilation']),
-    check("describe", "Salon describe can be up to 250 characters long").trim().isLength({ max: 250 }),
+    check("data.describe", "Salon describe can be up to 250 characters long").trim().isLength({ max: 250 }),
   ],
   CheckInputMiddleware, authenticateToken, SalonController.updateSalon)
 
@@ -45,19 +45,22 @@ Router.get("/previews/:type",authenticateToken, SalonController.getPreviews)
 //Get salon by ID
 Router.get("/salons/:id",authenticateToken, SalonController.getSalonByID)
 
+//Get salon services
+Router.get("/mysalon/:id/services",authenticateToken, SalonController.getSalonServices)
+
 //Add new salon service
 Router.post("/salonsservice/:id",
   [
-    check("offerTitle", "Offer title name can contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
-    check("time", "Time can not be empty").not().isEmpty(),
-    check("price", "Price can not be empty").not().isEmpty(),
+    check("data.offerTitle", "Offer title name can contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
+    check("data.time", "Time can not be empty").not().isEmpty(),
+    check("data.price", "Price can not be empty").not().isEmpty(),
   ],
   CheckInputMiddleware, authenticateToken, SalonController.addSalonService)
 
 //Update salon service
 Router.put("/salonsservice/:id",
   [
-    check("offerTitle", "Offer title name can contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
+    check("data.offerTitle", "Offer title name can contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
   ],
   CheckInputMiddleware, authenticateToken, SalonController.updateSalonService)
 
@@ -84,5 +87,8 @@ Router.post("/myfavs/:id", authenticateToken, SalonController.getFav)
 
 //Search
 Router.post("/search/:id", authenticateToken, SalonController.search)
+
+//Get my salons
+Router.get("/mysalons", authenticateToken, SalonController.getMySalon)
 
 export { Router as SalonRoutes };

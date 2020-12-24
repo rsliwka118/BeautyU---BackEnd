@@ -7,6 +7,7 @@ import { SalonRate } from "../../entity/Salon/SalonRate"
 import { SalonReview } from "../../entity/Salon/SalonReview"
 import { SalonService } from "../../entity/Salon/SalonService"
 import { User } from "../../entity/User/User"
+import { Visit } from "../../entity/Visits/Visits";
 
 //Check if parameter is equal null ( for update functions )
 function checkEmpty(param, existingItem){
@@ -26,26 +27,26 @@ export async function addSalon(req, res) {
 
         //Add Location
         let NewLocation = new SalonLocation()
-        NewLocation.city = req.body.city,
-        NewLocation.code = req.body.code,
-        NewLocation.street = req.body.street,
-        NewLocation.houseNumber = req.body.houseNumber,
-        NewLocation.apartmentNumber = req.body.apartmentNumber
+        NewLocation.city = req.body.data.city,
+        NewLocation.code = req.body.data.code,
+        NewLocation.street = req.body.data.street,
+        NewLocation.houseNumber = req.body.data.houseNumber,
+        NewLocation.apartmentNumber = req.body.data.apartmentNumber
         await RepositorySalonLocation.save(NewLocation)
 
         //Add Salon
         let NewSalon = new Salon()
         NewSalon.ownerID = user.id,
-        NewSalon.name = req.body.name,
-        NewSalon.type = req.body.type,
-        NewSalon.describe = req.body.describe,
-        NewSalon.hours = req.body.hours,
+        NewSalon.name = req.body.data.name,
+        NewSalon.type = req.body.data.type,
+        NewSalon.describe = req.body.data.describe,
+        NewSalon.hours = req.body.data.hours,
         NewSalon.location = NewLocation
 
         await RepositorySalon.save(NewSalon)
         console.dir(NewSalon)
 
-        return res.status(200).send("Successfuly added new salon for " + user.firstName + "!")
+        return res.status(200).send({message: "Dodano salon!", id: NewSalon.id})
 
     } catch (Error) {
       console.error(Error)
@@ -142,6 +143,7 @@ export async function getPreviews(req, res) {
       .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
       .where('salon.type = :type',{ type: req.params.type})
       .andWhere('location.city = :city', {city: user.city})
+      .andWhere('salon.ownerID != :id', {id: user.id})
       .getMany()
 
       const favorites = await getManager()
@@ -151,6 +153,33 @@ export async function getPreviews(req, res) {
       .getMany()
       
       return res.status(200).json({salons ,favorites})
+
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
+//Get my salons preview
+export async function getMySalon(req, res) {
+  try {
+    let RepositorySalon = getRepository(Salon)
+    let RepositoryUsers = getRepository(User)
+
+    //const salons = await RepositorySalon.find()
+    const user = await RepositoryUsers.findOne(req.user.id)
+
+    
+      const salons = await getManager()
+      .createQueryBuilder(Salon, 'salon')
+      // .leftJoin(Visit, 'visits', 'salon.id = visits.salonID')
+      .where('salon.ownerID = :id', {id: user.id})
+      // .andWhere('visits.status = "Scheduled"')
+      .select(['salon.id','salon.name','salon.type'])
+      // .addSelect('COUNT(DISTINCT(visits.id)) as visits')
+      .getMany()
+      
+      return res.status(200).json(salons)
 
   } catch (Error) {
     console.error(Error)
@@ -213,6 +242,30 @@ export async function getSalonByID(req, res) {
   }
 }
 
+export async function getSalonServices(req, res) {
+  try {
+    let RepositorySalon = getRepository(Salon)
+    let RepositorySalonService = getRepository(SalonService)
+    let RepositoryUsers = getRepository(User)
+
+    const user = await RepositoryUsers.findOne(req.user.id)
+    const salon = await RepositorySalon.findOne(req.params.id)
+
+      if( user.id !== salon.ownerID) return res.status(401).send("Route for salon owner")
+
+      const services = await RepositorySalonService
+      .createQueryBuilder('services')
+      .select('services')
+      .where('salonId = :id', {id: req.params.id})
+      .getMany()
+    
+      return res.status(200).send(services)
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
 //Add new salon service
 export async function addSalonService(req, res) {
   let RepositoryUsers = getRepository(User)
@@ -227,16 +280,16 @@ export async function addSalonService(req, res) {
 
       //Add Service
       let NewService = new SalonService()
-      NewService.offerTitle = req.body.offerTitle,
-      NewService.time = req.body.time,
-      NewService.price = req.body.price,
+      NewService.offerTitle = req.body.data.offerTitle,
+      NewService.time = req.body.data.time,
+      NewService.price = req.body.data.price,
       NewService.salon = salon
 
       await RepositorySalonService.save(NewService)
 
       console.dir(NewService)
 
-      return res.status(200).send("Successfuly added new service for " + salon.name + "!")
+      return res.status(200).send({message: "Dodano usługę!"})
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -285,7 +338,7 @@ export async function deleteSalonService(req, res) {
    
       await RepositorySalonService.delete(salonService);
 
-      res.send("Successfully deleted salon service " + salonService.offerTitle +  "( id: "+ salonService.id + ")")
+      res.send({message: "Usługa została usunięta"})
       return res.status(204)
   } catch (Error) {
     console.error(Error)
@@ -449,6 +502,17 @@ export async function getFav(req, res) {
     if ( user == null ) return res.status(404).send("No user found")
     if ( favList.length === 0) return res.status(404).send("No favs found")
     
+    //Fav list
+    const favorites = await getManager()
+    .createQueryBuilder(Salon, 'salon')
+    .select(['salon.id','salon.name'])
+    .where('salon.id IN (:favs)',{ favs: favList })
+    .leftJoinAndMapOne('salon.location', SalonLocation, 'location', 'salon.locationID = location.id')
+    .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
+    .getMany()
+
+    return res.status(200).send(favorites)
+
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")
@@ -472,6 +536,7 @@ export async function search(req, res) {
       .leftJoinAndMapMany("salon.rates", SalonRate, 'rate', 'salon.id = rate.salon')
       .where('location.city = :city', {city: user.city})
       .andWhere("name like :phrase", { phrase:`%${phrase}%`})
+      .andWhere('salon.ownerID != :id', {id: user.id})
       .getMany()
 
     return res.status(200).send(result)
