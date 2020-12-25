@@ -54,8 +54,8 @@ export async function addSalon(req, res) {
     }
   }
 
-//Update salon
-export async function updateSalon(req, res) {
+//Update salon info
+export async function updateSalonInfo(req, res) {
   let RepositoryUsers = getRepository(User)
   let RepositorySalon = getRepository(Salon)
   let RepositorySalonLocation = getRepository(SalonLocation)
@@ -71,23 +71,47 @@ export async function updateSalon(req, res) {
       //Update Location
       await RepositorySalonLocation.update(location.id,
         {
-          city: checkEmpty(req.body.city, location.city),
-          code: checkEmpty(req.body.code, location.code),
-          street: checkEmpty(req.body.street, location.street),
-          houseNumber: checkEmpty(req.body.houseNumber, location.houseNumber),
-          apartmentNumber: checkEmpty(req.body.apartmentNumber, location.houseNumber)
+          city: checkEmpty(req.body.data.city, location.city),
+          code: checkEmpty(req.body.data.code, location.code),
+          street: checkEmpty(req.body.data.street, location.street),
+          houseNumber: checkEmpty(req.body.data.houseNumber, location.houseNumber),
+          apartmentNumber: checkEmpty(req.body.data.apartmentNumber, location.houseNumber)
         })
 
       //Update Salon
       await RepositorySalon.update(req.params.id,
         {
-          name: checkEmpty(req.body.name, salon.name),
-          type: checkEmpty(req.body.type, salon.type),
-          describe: checkEmpty(req.body.describe, salon.describe),
-          hours: checkEmpty(req.body.hours, salon.hours)
+          name: checkEmpty(req.body.data.name, salon.name),
+          type: checkEmpty(req.body.data.type, salon.type),
+          describe: checkEmpty(req.body.data.describe, salon.describe)
         })
 
-      return res.status(200).send("Successfuly updated salon for " + user.firstName + "!")
+      return res.status(200).send({message: "Zaktualizowano informacje!"})
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
+//Update salon hours
+export async function updateSalonHours(req, res) {
+  let RepositoryUsers = getRepository(User)
+  let RepositorySalon = getRepository(Salon)
+  
+  const user = await RepositoryUsers.findOne(req.user.id)
+  const salon = await RepositorySalon.findOne(req.params.id)
+
+  try {
+    if (salon == null) return res.status(404).send("No salon found")
+    if (salon.ownerID != user.id) return res.status(403).send("You are not the owner of this salon")
+
+      //Update Hours
+      await RepositorySalon.update(req.params.id,
+        {
+          hours: checkEmpty(req.body.data.hours, salon.hours)
+        })
+
+      return res.status(200).send({message: "Zaktualizowano godziny!"})
   } catch (Error) {
     console.error(Error)
     return res.status(500).send("server err")

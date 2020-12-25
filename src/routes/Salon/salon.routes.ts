@@ -18,20 +18,31 @@ Router.post("/salon",
     check("data.city", "City can not be empty").not().isEmpty(),
     check("data.code", "Code can not be empty").not().isEmpty(),
     check("data.street", "Street can not be empty").not().isEmpty(),
-    check("data.houseNumber", "Number can not be empty").not().isEmpty(),
+    check("data.houseNumber", "Number can not be empty").not().isEmpty()
 
   ], 
   CheckInputMiddleware, authenticateToken, SalonController.addSalon)
 
-//Update salon
-Router.put("/salon/:id",
+//Update salon info
+Router.post("/salon/:id/update/info",
   [
-    check("data.name", "Salon name can contain maximum 50 characters").trim().isLength({ max: 50 }),
+    check("data.name", "Salon name must contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
     check("data.type", "Incorrect salon type. Must be Hairdresser, Barber, Massager, Beautician, Nails, Depilation")
     .isIn(['Hairdresser', 'Barber', 'Massager', 'Beautician', 'Nails', 'Depilation']),
     check("data.describe", "Salon describe can be up to 250 characters long").trim().isLength({ max: 250 }),
+    check("data.city", "City can not be empty").not().isEmpty(),
+    check("data.code", "Code can not be empty").not().isEmpty(),
+    check("data.street", "Street can not be empty").not().isEmpty(),
+    check("data.houseNumber", "Number can not be empty").not().isEmpty()
   ],
-  CheckInputMiddleware, authenticateToken, SalonController.updateSalon)
+  CheckInputMiddleware, authenticateToken, SalonController.updateSalonInfo)
+
+//Update salon hours
+Router.post("/salon/:id/update/hours",
+  [
+    check("data.hours", "Hours can not be empty").not().isEmpty()
+  ],
+  CheckInputMiddleware, authenticateToken, SalonController.updateSalonHours)
 
 //Delete salon
 Router.delete("/salons/:id", authenticateToken, SalonController.deleteSalon)
@@ -58,7 +69,7 @@ Router.post("/salonsservice/:id",
   CheckInputMiddleware, authenticateToken, SalonController.addSalonService)
 
 //Update salon service
-Router.put("/salonsservice/:id",
+Router.post("/salonsservice/:id",
   [
     check("data.offerTitle", "Offer title name can contain minimum 5 and maximum 50 characters").trim().isLength({ min: 5, max: 50 }),
   ],
