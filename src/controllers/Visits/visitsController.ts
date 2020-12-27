@@ -81,6 +81,42 @@ export async function getVisit(req, res) {
   }
 }
 
+//Get salon visits
+export async function getSalonVisit(req, res) {
+  try {
+      //Get visits
+      const visits = await getRepository(Visit)
+      .createQueryBuilder('visit')
+      .select(['visit.id','visit.date','visit.hour','visit.status','visit.info'])
+      .leftJoinAndMapOne('visit.userID', User, 'user', 'visit.userID = user.id')
+      .leftJoinAndMapOne('visit.serviceID', SalonService, 'service', 'visit.serviceID = service.id')
+      .where("visit.salonID = :salonID", { salonID: req.params.id})
+      .andWhere("visit.date >= :start_at", { start_at: req.body.data.start })
+      .andWhere("visit.date <= :end_at", { end_at: req.body.data.end })
+      .andWhere("status = 'Scheduled'")
+      .orderBy("visit.date")
+      .getMany()
+
+      //Get history
+      const history = await getManager()
+      .createQueryBuilder(Visit, 'visit')
+      .select(['visit.id','visit.date','visit.hour','visit.status'])
+      .addSelect('visit.hour')
+      .leftJoinAndMapOne('visit.userID', User, 'user', 'visit.userID = user.id')
+      .leftJoinAndMapOne('visit.serviceID', SalonService, 'service', 'visit.serviceID = service.id')
+      .where("visit.salonID = :salonID", { salonID: req.params.id})
+      .andWhere("status != 'Scheduled'")
+      .orderBy("visit.date", "DESC")
+      .getMany()
+
+      return res.status(200).send({visits: visits, history: history})
+ 
+  } catch (Error) {
+    console.error(Error)
+    return res.status(500).send("server err")
+  }
+}
+
 //Update status
 export async function updateStatus(req,res){
 

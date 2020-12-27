@@ -13,8 +13,11 @@ Router.post("/visits/:id", authenticateToken, VisitsController.addVisit)
 //Get user visits
 Router.get("/visits", authenticateToken, VisitsController.getVisit)
 
-//Get user visits
-Router.get("/visits", authenticateToken, VisitsController.getVisit)
+//Get salon visits
+Router.post("/mysalon/:id/visits", authenticateToken, VisitsController.getSalonVisit)
+
+//Get salon history
+//Router.get("/mysalon/:id/history", authenticateToken, VisitsController.getSalonHistory)
 
 //Update visit status
 Router.post("/visits/status/:id", authenticateToken, VisitsController.updateStatus)
